@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 
-import 'ui_constants.dart';
+import '../constants/ui_constants.dart';
 // TODO mettre des FittedBox partout partout partout partout et le score sous le "Player"
 class Scores extends StatefulWidget {
   const Scores({Key? key}) : super(key: key);

@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'ui_constants.dart';
+import '../constants/ui_constants.dart';
 
 BoxDecoration GameBoxDecoration([double radius=DEFAULT_BORDER_RADIUS]) => BoxDecoration(
   color: Colors.black,

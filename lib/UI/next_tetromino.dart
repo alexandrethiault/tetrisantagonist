@@ -4,7 +4,7 @@ import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'package:tetrisserver/DataLayer/tetromino.dart';
 
 import 'my_decorations.dart';
-import 'ui_constants.dart';
+import '../constants/ui_constants.dart';
 //TODO quand y en a plusieurs qui doivent tomber d'un coup, changer l'affichage
 class NextTetromino extends StatefulWidget {
   const NextTetromino({Key? key}) : super(key: key);

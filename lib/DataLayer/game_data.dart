@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 
 import 'square.dart';
 import 'tetromino.dart';
@@ -29,9 +28,6 @@ class GameData with ChangeNotifier {
   double energy = 0.3;
 
   Timer timer = Timer.periodic(DURATION, (timer) => {});
-
-  final FlutterBlue flutterBlue = FlutterBlue.instance;
-  final List<BluetoothDevice> devicesList = <BluetoothDevice>[];
 
   void _incrementNextPlayer() {
     nextPlayer++;
@@ -100,30 +96,7 @@ class GameData with ChangeNotifier {
 
   void shiftRight() async {
     curTetromino.x += 1;
-    await flutterBlue.startScan(timeout: const Duration(seconds: 10));
-    flutterBlue.connectedDevices.asStream().listen(
-      (List<BluetoothDevice> devices) {
-        for (BluetoothDevice device in devices) {
-          _addDeviceTolist(device);
-        }
-      }
-    );
-    flutterBlue.scanResults.listen(
-      (List<ScanResult> results) {
-        for (ScanResult result in results) {
-          _addDeviceTolist(result.device);
-        }
-      }
-    );
     notifyListeners();
   }
-
-  void _addDeviceTolist(final BluetoothDevice device) {
-    if (!devicesList.contains(device)) {
-      devicesList.add(device);
-      print("[GameData] "+device.name);
-    }
-  }
-
 
 }

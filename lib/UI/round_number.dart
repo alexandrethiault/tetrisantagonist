@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 
 import 'my_decorations.dart';
-import 'ui_constants.dart';
+import '../constants/ui_constants.dart';
 
 class RoundNumber extends StatefulWidget {
   const RoundNumber({Key? key}) : super(key: key);

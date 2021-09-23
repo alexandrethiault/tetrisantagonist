@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 
-import 'ui_constants.dart';
+import '../constants/ui_constants.dart';
 
 class Antagonist extends StatefulWidget {
   const Antagonist({Key? key}) : super(key: key);

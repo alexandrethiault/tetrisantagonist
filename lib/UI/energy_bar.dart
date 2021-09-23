@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 
-import 'game.dart';
+import 'game_widget.dart';
 import 'my_decorations.dart';
-import 'ui_constants.dart';
+import '../constants/ui_constants.dart';
 
 class EnergyBar extends StatefulWidget {
   const EnergyBar({Key? key}) : super(key: key);

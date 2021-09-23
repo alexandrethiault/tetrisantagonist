@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 
 import 'my_decorations.dart';
-import 'ui_constants.dart';
+import '../constants/ui_constants.dart';
 
 class StartStop extends StatefulWidget {
   const StartStop({Key? key}) : super(key: key);
