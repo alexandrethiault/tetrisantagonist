@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
@@ -24,13 +22,16 @@ class GameWidgetState extends State<GameWidget> {
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 1.0*GRID_WIDTH/GRID_HEIGHT,
-      child: Container(
-        key: _keyGameWidget,
-        decoration: GameBoxDecoration(),
-        child: GestureDetector(
-          onTapDown: (TapDownDetails d) =>
-            shiftRight(),
-            child: _squareStack()
+      child: GestureDetector(
+        onPanEnd: (DragEndDetails d) =>
+            Provider.of<GameData>(context, listen: false).applyCommand(
+              (d.velocity.pixelsPerSecond.dx < 0) ? "Left" : "Right"),
+        onTapDown: (TapDownDetails d) =>
+            Provider.of<GameData>(context, listen: false).applyCommand("TurnRight"),
+        child: Container(
+          key: _keyGameWidget,
+          decoration: GameBoxDecoration(),
+          child: _squareStack(),
         ),
       ),
     );
@@ -46,7 +47,7 @@ class GameWidgetState extends State<GameWidget> {
     }
 
     final RenderBox renderBoxTetris = _keyGameWidget.currentContext!.findRenderObject() as RenderBox;
-    double width = (renderBoxTetris.size.width - 2*DEFAULT_BORDER_RADIUS)/ GRID_WIDTH;
+    double width = (renderBoxTetris.size.width - 2*DEFAULT_BORDER_WIDTH)/ GRID_WIDTH;
 
     for (Square square in groundSquares) {
       stackChildren.add(
@@ -61,8 +62,6 @@ class GameWidgetState extends State<GameWidget> {
         )
       );
     }
-
-
 
     for (Square square in fallingSquares) {
       stackChildren.add(
@@ -89,8 +88,4 @@ class GameWidgetState extends State<GameWidget> {
     return Stack(children: stackChildren);
   }
 
-  void shiftRight() {
-    Provider.of<GameData>(context, listen: false).shiftRight();
-
-  }
 }

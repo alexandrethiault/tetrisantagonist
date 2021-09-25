@@ -10,4 +10,12 @@ class Square {
     this.y = y;
     this.color = color;
   }
+
+  bool collidesWith(Square other) {
+    return ((x == other.x) && (y == other.y));
+  }
+
+  bool isOutOfBounds(int GRID_HEIGHT, int GRID_WIDTH) {
+    return ((y >= GRID_HEIGHT) || (x < 0) || (x >= GRID_WIDTH));
+  }
 }

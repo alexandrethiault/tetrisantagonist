@@ -68,7 +68,7 @@ class _NextTetrominoState extends State<NextTetromino> {
       List<Widget> rows = [];
       for (int x = minX; x <= maxX; ++x) {
         color = Colors.transparent;
-        for (var square in nextTetromino.squares) {
+        for (var square in nextTetromino.baseSquares) {
           if (square.x == x && square.y == y) {
             color = nextTetromino.color;
             break;

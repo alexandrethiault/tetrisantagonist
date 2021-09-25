@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'square.dart';
 //TODO collisions tmtc
@@ -62,7 +64,7 @@ class Tetromino {
     rotations = [[],[],[],[]];
   }
 
-  Tetromino.fromType(int type, Color color, this.rotationIndex) {
+  Tetromino.fromType(int type, Color color, [this.rotationIndex=0]) {
     String string = tetrominoes;
     List<String> lines = string.split('\n');
     rotations = [[],[],[],[]];
@@ -75,8 +77,18 @@ class Tetromino {
         }
       }
     }
-    x = 5-width~/2;
-    y = -height;
+    x = 5-width~/2-minX;
+    y = -maxY;
+  }
+
+  Tetromino.random(Color color) :
+        this.fromType(Random().nextInt(7), color, Random().nextInt(4));
+
+  Tetromino copy() {
+    Tetromino copy = Tetromino(rotations, rotationIndex);
+    copy.x = x;
+    copy.y = y;
+    return copy;
   }
 
   Color get color {
@@ -91,9 +103,21 @@ class Tetromino {
     }
   }
 
+  get baseSquares {
+    return rotations[rotationIndex];
+  }
+
+  get squares {
+    List<Square> list = <Square>[];
+    for (Square square in baseSquares) {
+      list.add(Square(square.x+x, square.y+y, color));
+    }
+    return list;
+  }
+
   int get maxX {
     int maxX = 0;
-    for (var square in squares) {
+    for (var square in baseSquares) {
       if (square.x > maxX) maxX = square.x;
     }
     return maxX;
@@ -101,7 +125,7 @@ class Tetromino {
 
   int get minX {
     int minX = 3;
-    for (var square in squares) {
+    for (var square in baseSquares) {
       if (square.x < minX) minX = square.x;
     }
     return minX;
@@ -113,7 +137,7 @@ class Tetromino {
 
   int get maxY {
     int maxY = 0;
-    for (var square in squares) {
+    for (var square in baseSquares) {
       if (square.y > maxY) maxY = square.y;
     }
     return maxY;
@@ -121,7 +145,7 @@ class Tetromino {
 
   int get minY {
     int minY = 3;
-    for (var square in squares) {
+    for (var square in baseSquares) {
       if (square.y < minY) minY = square.y;
     }
     return minY;
@@ -131,11 +155,8 @@ class Tetromino {
     return maxX - minX + 1;
   }
 
-  get squares {
-    return rotations[rotationIndex];
-  }
-
-  void apply(String command) {
+  // Apply command without safe-checking anything
+  void _apply(String command) {
     if (command == "Down") {
       y += 1;// y=0 = top of the screen
     } else if (command == "Right") {
@@ -148,17 +169,97 @@ class Tetromino {
     } else if (command == "TurnLeft") {
       if (rotationIndex == 0) rotationIndex = 4;
       rotationIndex--;
+    } else {
+      color = Colors.grey;
+      print("[tetromino.dart/apply] Tried to apply an unknown command");
     }
   }
 
-  bool reachedGround(int GRID_HEIGHT) {
-    return (maxY + y >= GRID_HEIGHT);
+  // Return the result of "apply" to a copy (without modifying this)
+  Tetromino _withApplied(String command) {
+    Tetromino copied = copy();
+    copied._apply(command);
+    return copied;
   }
 
-  void addSquaresTo(List<Square> list) {
-    for (Square square in rotations[rotationIndex]) {
-      list.add(Square(square.x + x, square.y + y, square.color));
+  // Test if command can be applied, without modifying this for now
+  bool _canApply(String command, List<Tetromino> currentTetrominos,
+                List<Square> groundSquares, int gridHeight, int gridWidth) {
+    Tetromino future = _withApplied(command);
+
+    if (future.isOutOfBounds(gridHeight, gridWidth)) {
+      return false;
     }
+
+    if (future.collidesWithGroundSquares(groundSquares)) {
+      return false;
+    }
+
+    if (command == "Down") {
+      return true; // don't test on other tetrominos
+    }
+
+    for (Tetromino otherTetromino in currentTetrominos) {
+      if (otherTetromino.color != color) {
+        if (future.collidesWithOther(otherTetromino)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  // Apply command and return true if canApply returned true, or return false
+  bool tryToApply(String command, List<Tetromino> currentTetrominoes,
+                  List<Square> groundSquares, int gridHeight, int gridWidth) {
+    if (_canApply(command, currentTetrominoes, groundSquares, gridHeight, gridWidth)) {
+      _apply(command);
+      return true;
+    }
+    return false;
+  }
+
+  bool collidesWithOther(Tetromino other) {
+    List<Square> otherSquares = other.squares;
+    for (Square square1 in squares) {
+      for (Square square2 in otherSquares) {
+        if (square1.collidesWith(square2)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool collidesWithGroundSquares(List<Square> groundSquares) {
+    for (Square square1 in squares) {
+      for (Square square2 in groundSquares) {
+        if (square1.collidesWith(square2)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool isOutOfBounds(int gridHeight, int gridWidth) {
+    for (Square square in squares) {
+      if (square.isOutOfBounds(gridHeight, gridWidth)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool addSquaresTo(List<Square> list) {
+    for (Square square in squares) {
+      if (square.y < 0) {
+        return false;
+      }
+      list.add(square);
+    }
+    return true;
   }
 
 }
