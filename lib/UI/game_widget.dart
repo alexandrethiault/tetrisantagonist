@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'package:tetrisserver/DataLayer/square.dart';
 import 'package:tetrisserver/DataLayer/tetromino.dart';
+import 'package:tetrisserver/UI/antagonist_widget.dart';
 
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
@@ -79,9 +82,8 @@ class GameWidgetState extends State<GameWidget> {
 
     stackChildren.add(
         const Positioned(
-          left: 50,
-          top: 50,
-          child: Image(image: AssetImage('assets/antagonistlol.png')),
+          top: 0,
+          child: Antagonist(),
         )
     );
 

@@ -34,7 +34,7 @@ dependencies:
   device_info_plus: ^2.1.0
   flutter_nearby_connections: ^1.1.1
   flutter_styled_toast: ^2.0.0
-
+  flame: ^0.29.4
 
 dev_dependencies:
   flutter_test:

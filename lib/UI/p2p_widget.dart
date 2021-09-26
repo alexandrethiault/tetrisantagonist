@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
-enum DeviceType { advertiser, browser }
+enum DeviceType { host, player }
 
 class DevicesListScreen extends StatefulWidget {
   const DevicesListScreen({required this.deviceType});
@@ -47,7 +47,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     return ListView.builder(
             itemCount: getItemCount(),
             itemBuilder: (context, index) {
-              final device = widget.deviceType == DeviceType.advertiser
+              final device = widget.deviceType == DeviceType.host
                   ? connectedDevices[index]
                   : devices[index];
               return Container(
@@ -178,7 +178,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
   }
 
   int getItemCount() {
-    if (widget.deviceType == DeviceType.advertiser) {
+    if (widget.deviceType == DeviceType.host) {
       return connectedDevices.length;
     } else {
       return devices.length;
@@ -219,7 +219,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
         strategy: Strategy.P2P_CLUSTER,
         callback: (isRunning) async {
           if (isRunning) {
-            if (widget.deviceType == DeviceType.browser) {
+            if (widget.deviceType == DeviceType.player) {
 
               await nearbyService.stopBrowsingForPeers();
               await Future.delayed(Duration(microseconds: 200));

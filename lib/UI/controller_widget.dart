@@ -13,42 +13,56 @@ class PlayerControllerWidget extends StatefulWidget {
 class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   @override
   Widget build(BuildContext context) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     return SafeArea(
       child: Scaffold(
         body: Container(
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Flexible(
               flex: 1,
-              child: Container(
-                  width: 100,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: Icon(Icons.arrow_back_ios),
-                  )),
+              child: InkWell(
+                onTap: moveLeft,
+                child: Container(
+                    width: 100,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Icon(Icons.arrow_back_ios),
+                    )),
+              ),
             ),
             Expanded(
                 flex: 4,
                 child: GestureDetector(
                   child: Container(
-                    child: DevicesListScreen(deviceType: DeviceType.browser),
+                    child: DevicesListScreen(deviceType: DeviceType.player),
                   ),
                 )),
             Flexible(
               flex: 1,
-              child: Container(
-                  width: 100,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: Icon(Icons.arrow_forward_ios),
-                  )),
+              child: InkWell(
+                onTap: moveRight,
+                child: Container(
+                    width: 100,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Icon(Icons.arrow_forward_ios),
+                    )),
+              ),
             ),
           ]),
         ),
       ),
     );
+  }
+
+  void moveLeft() {
+    print("[ControllerWidget] Move left");
+  }
+
+  void moveRight() {
+    print("[ControllerWidget] Move right");
   }
 }

@@ -1,9 +1,12 @@
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:flame/animation.dart' as animation;
 
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:flame/flame.dart';
+
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:flame/position.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tetrisserver/DataLayer/game_data.dart';
-
-import '../constants/ui_constants.dart';
 
 class Antagonist extends StatefulWidget {
   const Antagonist({Key? key}) : super(key: key);
@@ -13,31 +16,22 @@ class Antagonist extends StatefulWidget {
 }
 
 class _AntagonistState extends State<Antagonist> {
+  double WIDTH = 64;
+  double HEIGHT = 64;
+  double FRAME_WIDTH = 64;
+  int AMOUNT = 4;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-          color: BACKGROUND_COLOR,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                child: Image(image: AssetImage('assets/antagonistlol.png'))
-              ),
-            )
-          ),
-          Flexible(
-              flex: 1,
-              child: Container()
-          )
-        ],
-      ),
-    );
+        height: 150,
+        width: 150,
+        child: FittedBox(
+          fit : BoxFit.contain,
+          child: Flame.util.animationAsWidget(
+              Position(WIDTH, HEIGHT),
+              animation.Animation.sequenced('nemesis.png', AMOUNT,
+                  textureWidth: WIDTH, textureHeight: HEIGHT)),
+        ));
   }
-
 }

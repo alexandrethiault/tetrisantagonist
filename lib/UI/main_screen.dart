@@ -41,55 +41,58 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             const Scores(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  child: Column(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Flexible(
-                            flex: GRID_TO_SIDEBAR_RATIO,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                DEFAULT_BORDER_WIDTH*4,
-                                DEFAULT_BORDER_WIDTH*4,
-                                DEFAULT_BORDER_WIDTH*2,
-                                DEFAULT_BORDER_WIDTH*4
-                              ),
-                              child: GameWidget(key: _key),
+              child: Container(
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Flexible(
+                          flex: GRID_TO_SIDEBAR_RATIO,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              DEFAULT_BORDER_WIDTH*4,
+                              DEFAULT_BORDER_WIDTH*4,
+                              DEFAULT_BORDER_WIDTH*2,
+                              DEFAULT_BORDER_WIDTH*4
+                            ),
+                            child: GameWidget(key: _key),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              DEFAULT_BORDER_WIDTH*2,
+                              DEFAULT_BORDER_WIDTH*4,
+                              DEFAULT_BORDER_WIDTH*4,
+                              DEFAULT_BORDER_WIDTH*4
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const <Widget>[
+                                NextTetromino(),
+                                SizedBox(height: 30),
+                                EnergyBar(),
+                                SizedBox(height: 30),
+                                RoundNumber(),
+                                SizedBox(height: 30),
+                                StartStop(),
+                              ],
                             ),
                           ),
-                          Flexible(
-                            flex: 1,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                DEFAULT_BORDER_WIDTH*2,
-                                DEFAULT_BORDER_WIDTH*4,
-                                DEFAULT_BORDER_WIDTH*4,
-                                DEFAULT_BORDER_WIDTH*4
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const <Widget>[
-                                  NextTetromino(),
-                                  SizedBox(height: 30),
-                                  EnergyBar(),
-                                  SizedBox(height: 30),
-                                  RoundNumber(),
-                                  SizedBox(height: 30),
-                                  StartStop(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Container(
+                            height: 200,
+                            child: DevicesListScreen(deviceType: DeviceType.host)),
                       ),
-                      Container(
-                          height: 200,
-                          child: DevicesListScreen(deviceType: DeviceType.advertiser)),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
