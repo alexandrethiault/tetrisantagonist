@@ -54,7 +54,13 @@ class _NextTetrominoState extends State<NextTetromino> {
   Widget nextTetrominoWidget() {
     if (!Provider.of<GameData>(context).isLaunched) return Container();
 
-    Tetromino nextTetromino = Provider.of<GameData>(context).nextTetromino;
+    Tetromino nextTetromino = Tetromino.nullTetromino();
+    List<Tetromino> nextTetrominos = Provider.of<GameData>(context).nextTetrominos;
+    if (nextTetrominos.isEmpty) {
+      return Container();
+    } else {
+      nextTetromino = nextTetrominos[0];
+    }
     int minX = nextTetromino.minX;
     int maxX = nextTetromino.maxX;
     int minY = nextTetromino.minY;

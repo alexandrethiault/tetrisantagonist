@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'square.dart';
 import 'tetromino.dart';
 
-const int GRID_WIDTH = 10;
-const int GRID_HEIGHT = 16;
-const Duration DURATION = Duration(milliseconds: 500);
+const int GRID_WIDTH = 20;
+const int GRID_HEIGHT = 32;
+const Duration DURATION = Duration(milliseconds: 250);
 
 // Things that can't stay inside GameState and need to be exposed to other widgets
 class GameData with ChangeNotifier {
@@ -19,8 +19,8 @@ class GameData with ChangeNotifier {
     Colors.orange, Colors.blue, Colors.green, Colors.yellow];
 
   int nextPlayer = 1;
-  Tetromino curTetromino = Tetromino.nullTetromino();
-  Tetromino nextTetromino = Tetromino.nullTetromino();
+  List<Tetromino> curTetrominos = <Tetromino>[];
+  List<Tetromino> nextTetrominos = <Tetromino>[];
   List<Square> groundSquares = <Square>[];
 
   int antagonist = 2;
@@ -50,11 +50,15 @@ class GameData with ChangeNotifier {
       scores[i] = 0;
     }
 
-    curTetromino = Tetromino.random(playerColors[nextPlayer]);
+    for (int _ in [0,1,2]) {
+      nextTetrominos.add(Tetromino.random(playerColors[nextPlayer]));
+      _incrementNextPlayer();
+    }
+
+    _sendNextTetromino();
+
     groundSquares = <Square>[];
 
-    _incrementNextPlayer();
-    nextTetromino = Tetromino.random(playerColors[nextPlayer]);
 
     timer = Timer.periodic(DURATION, onPlay);
 
@@ -65,8 +69,8 @@ class GameData with ChangeNotifier {
     isLaunched = false;
 
     groundSquares = <Square>[];
-    curTetromino = Tetromino.nullTetromino();
-    nextTetromino = Tetromino.nullTetromino();
+    curTetrominos.clear();
+    nextTetrominos.clear();
     energy = 1-energy;
     _incrementAntagonist();
     timer.cancel();
@@ -79,42 +83,86 @@ class GameData with ChangeNotifier {
     if (!isLaunched) {
       return false;
     }
-
     bool applied = false;
-    Color playerColor = curTetromino.color;
-    if (playerSendingCommand != -1) {
-      playerColor = playerColors[playerSendingCommand];
-    }
 
-    if (playerColor == curTetromino.color) {
-      if (applied = curTetromino.tryToApply(command, [], groundSquares,
-                                            GRID_HEIGHT, GRID_WIDTH)) {
-        notifyListeners();
+    if (command.startsWith("Antagonist:")) {
+      if (command == "Antagonist:test") {
+        _sendNextTetromino();
+      } else if (command.startsWith("Antagonist:TriggerTetromino")) {
+        int tetrominoIndex = int.parse(command[command.length-1]);
+        double energyNeeded = 0.4;
+        if (energy < energyNeeded) {
+          return false;
+        }
+        if (nextTetrominos.isEmpty) {
+          return false;
+        }
+        nextTetrominos[0] = Tetromino.fromType(tetrominoIndex, nextTetrominos[0].color, 0);
+        energy -= energyNeeded;
+        print(energy);
+      } else if (command == "Antagonist: ...") {
+        double energyNeeded = 0.4;
+        if (energy < energyNeeded) {
+          return false;
+        }
+        //...
+        energy -= energyNeeded;
+      } else {
+        nextTetrominos[0].color = Colors.grey;
+        print("[game_data.dart/applyCommand] Tried to apply an unknown antagonist command");
+      }
+      notifyListeners();
+    } else {
+      for (Tetromino curTetromino in curTetrominos) {
+        Color playerColor = curTetromino.color;
+        if (playerSendingCommand != -1) {
+          playerColor = playerColors[playerSendingCommand];
+        }
+
+        if (playerColor == curTetromino.color) {
+          if (applied |= curTetromino.tryToApply(command, [], groundSquares,
+              GRID_HEIGHT, GRID_WIDTH)) {
+            notifyListeners();
+          }
+        }
       }
     }
+
     return applied;
   }
 
   void onPlay(Timer timer) {
-    if (!curTetromino.tryToApply("Down", [], groundSquares,
-                                  GRID_HEIGHT, GRID_WIDTH)) {
-      if (!curTetromino.addSquaresTo(groundSquares)) {
-        // Not fully inside the screen when reached ground squares: game over
-        endGame();
-      }
-      _deleteFullLines();
-      if (!_sendNextTetromino()) {
-        // Can't send next tetromino: game over
-        endGame();
+    for (Tetromino curTetromino in curTetrominos) {
+      if (!curTetromino.tryToApply("Down", [], groundSquares,
+          GRID_HEIGHT, GRID_WIDTH)) {
+        if (!curTetromino.addSquaresTo(groundSquares)) {
+          // Not fully inside the screen when reached ground squares: game over
+          endGame();
+        }
+        _deleteFullLines();
+        _removeFromCurTetrominos(curTetromino);
+        if (!_sendNextTetromino()) {
+          // Can't send next tetromino: game over
+          endGame();
+        }
       }
     }
     notifyListeners();
   }
 
+  bool _removeFromCurTetrominos(Tetromino onGround) {
+    return curTetrominos.remove(onGround);
+  }
+
   bool _sendNextTetromino() {
-    curTetromino = nextTetromino;
+    if (curTetrominos.length > 3) {
+      return true;
+    }
+    Tetromino curTetromino = nextTetrominos[0];
+    curTetrominos.add(curTetromino);
+    nextTetrominos.remove(curTetromino);
     _incrementNextPlayer();
-    nextTetromino = Tetromino.random(playerColors[nextPlayer]);
+    nextTetrominos.add(Tetromino.random(playerColors[nextPlayer]));
 
     // Test game over condition
     return !curTetromino.collidesWithGroundSquares(groundSquares);

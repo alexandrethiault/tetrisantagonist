@@ -77,7 +77,7 @@ class Tetromino {
         }
       }
     }
-    x = 5-width~/2-minX;
+    x = 10-width~/2-minX;
     y = -maxY;
   }
 

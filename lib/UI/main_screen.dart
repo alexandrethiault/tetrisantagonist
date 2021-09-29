@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
     ]);
     return Scaffold(
       appBar: AppBar(
@@ -84,12 +84,13 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ],
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: Container(
-                            height: 200,
-                            child: DevicesListScreen(deviceType: DeviceType.host)),
+                    const Expanded(
+                      child: SizedBox(
+                        height: 200,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: DevicesListScreen(deviceType: DeviceType.host),
+                        ),
                       ),
                     ),
                   ],

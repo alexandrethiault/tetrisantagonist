@@ -6,17 +6,17 @@ import 'package:tetrisserver/UI/controller_widget.dart';
 import 'DataLayer/game_data.dart';
 import 'UI/main_screen.dart';
 
-GameData gameData = new GameData();
+GameData gameData = GameData();
 
 void main() => runApp(
   const MyApp(),
 );
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  gameData = new GameData();
+  gameData = GameData();
   switch (settings.name) {
     case '/':
-      return MaterialPageRoute(builder: (_) => Home());
+      return MaterialPageRoute(builder: (_) => const Home());
     case 'join':
       return MaterialPageRoute(
           builder: (_) => PlayerControllerWidget());
@@ -24,7 +24,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
               create: (context) => gameData,
-              child: MainScreen()));
+              child: const MainScreen()));
     default:
       return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    return MaterialApp(
+    return const MaterialApp(
       onGenerateRoute: generateRoute,
       initialRoute: '/',
     );
@@ -48,8 +48,14 @@ class MyApp extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return Scaffold(
       body: Column(
         children: [
@@ -63,7 +69,7 @@ class Home extends StatelessWidget {
                 child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                      children: const [
                         Text(
                           'JOIN',
                           style: TextStyle(color: Colors.white, fontSize: 40),
@@ -84,7 +90,7 @@ class Home extends StatelessWidget {
                 child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                      children: const [
                         Text(
                           'HOST',
                           style: TextStyle(color: Colors.white, fontSize: 40),

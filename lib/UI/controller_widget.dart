@@ -56,7 +56,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               flex: 1,
               child: connected
                   ? InkWell(
-                      onTap: moveLeft,
+                      onTapDown: (d) => moveLeft,
                       child: Container(
                           width: 100,
                           child: FittedBox(
