@@ -9,3 +9,5 @@ const double SIZED_BOX_SIZE = 5.0;
 const Color BACKGROUND_COLOR = Colors.blueGrey;
 const Color BORDERS_COLOR = Colors.red;
 const String FONT = "Courier";
+
+enum DeviceType { host, player }

@@ -6,8 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:provider/provider.dart';
+import 'package:tetrisserver/DataLayer/game_data.dart';
+import 'package:tetrisserver/constants/ui_constants.dart';
 
-enum DeviceType { host, player }
+import '../main.dart';
 
 class DevicesListScreen extends StatefulWidget {
   const DevicesListScreen({required this.deviceType});
@@ -261,6 +264,8 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     receivedDataSubscription =
         nearbyService.dataReceivedSubscription(callback: (data) {
           print("dataReceivedSubscription: ${jsonEncode(data)}");
+          print(Message.fromJson(data).message.toString());
+          gameData.applyCommand(Message.fromJson(data).message.toString());
           showToast(jsonEncode(data),
               context: context,
               axis: Axis.horizontal,

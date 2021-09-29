@@ -6,12 +6,14 @@ import 'package:tetrisserver/UI/controller_widget.dart';
 import 'DataLayer/game_data.dart';
 import 'UI/main_screen.dart';
 
+GameData gameData = new GameData();
 
 void main() => runApp(
   const MyApp(),
 );
 
 Route<dynamic> generateRoute(RouteSettings settings) {
+  gameData = new GameData();
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(builder: (_) => Home());
@@ -21,7 +23,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case 'host':
       return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
-              create: (context) => GameData(),
+              create: (context) => gameData,
               child: MainScreen()));
     default:
       return MaterialPageRoute(
@@ -57,11 +59,17 @@ class Home extends StatelessWidget {
                 Navigator.pushNamed(context, 'join');
               },
               child: Container(
-                color: Colors.red,
+                color: Colors.green,
                 child: Center(
-                    child: Text(
-                      'JOIN',
-                      style: TextStyle(color: Colors.white, fontSize: 40),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'JOIN',
+                          style: TextStyle(color: Colors.white, fontSize: 40),
+                        ),
+                        Icon(Icons.videogame_asset, color: Colors.white,)
+                      ],
                     )),
               ),
             ),
@@ -72,11 +80,17 @@ class Home extends StatelessWidget {
                 Navigator.pushNamed(context, 'host');
               },
               child: Container(
-                color: Colors.green,
+                color: Colors.orange,
                 child: Center(
-                    child: Text(
-                      'HOST',
-                      style: TextStyle(color: Colors.white, fontSize: 40),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'HOST',
+                          style: TextStyle(color: Colors.white, fontSize: 40),
+                        ),
+                        Icon(Icons.connected_tv, color: Colors.white,)
+                      ],
                     )),
               ),
             ),
