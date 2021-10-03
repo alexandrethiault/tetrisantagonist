@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
@@ -32,7 +30,7 @@ class GameWidgetState extends State<GameWidget> {
         onTapDown: (TapDownDetails d)
         {
         Provider.of<GameData>(context, listen: false).applyCommand("TurnRight");
-          Provider.of<GameData>(context, listen: false).applyCommand("Antagonist:test");},
+          Provider.of<GameData>(context, listen: false).applyCommand("Antagonist:SwitchFalling");},
         child: Container(
           key: _keyGameWidget,
           decoration: GameBoxDecoration(),

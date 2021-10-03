@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -8,8 +9,9 @@ import 'tetromino.dart';
 const int GRID_WIDTH = 20;
 const int GRID_HEIGHT = 32;
 const Duration DURATION = Duration(milliseconds: 250);
+const int COOL_DOWN_INIT = 15;
 
-// Things that can't stay inside GameState and need to be exposed to other widgets
+// data that can't stay inside GameState and must be exposed to other widgets
 class GameData with ChangeNotifier {
   bool isLaunched = false;
   int roundNumber = 0;
@@ -22,9 +24,12 @@ class GameData with ChangeNotifier {
   List<Tetromino> curTetrominos = <Tetromino>[];
   List<Tetromino> nextTetrominos = <Tetromino>[];
   List<Square> groundSquares = <Square>[];
+  int coolDownFall = 0;
+  int coolDownSpeed = 1;
+  int coolDownUntilReset = 0;
 
-  int antagonist = 2;
-  double energy = 0.3;
+  int antagonist = 0;
+  double energy = 0.0;
 
   Timer timer = Timer.periodic(DURATION, (timer) => {});
 
@@ -55,10 +60,14 @@ class GameData with ChangeNotifier {
       _incrementNextPlayer();
     }
 
-    _sendNextTetromino();
+    coolDownFall = 0;
+    coolDownSpeed = 1;
+    coolDownUntilReset = 0;
+    //_sendNextTetromino();
 
     groundSquares = <Square>[];
 
+    energy = 0.9;
 
     timer = Timer.periodic(DURATION, onPlay);
 
@@ -68,11 +77,12 @@ class GameData with ChangeNotifier {
   void endGame() {
     isLaunched = false;
 
-    groundSquares = <Square>[];
+    _incrementAntagonist();
+
+    groundSquares.clear();
     curTetrominos.clear();
     nextTetrominos.clear();
-    energy = 1-energy;
-    _incrementAntagonist();
+
     timer.cancel();
 
     notifyListeners();
@@ -83,36 +93,91 @@ class GameData with ChangeNotifier {
     if (!isLaunched) {
       return false;
     }
-    bool applied = false;
 
     if (command.startsWith("Antagonist:")) {
-      if (command == "Antagonist:test") {
-        _sendNextTetromino();
-      } else if (command.startsWith("Antagonist:TriggerTetromino")) {
+      double energyNeeded = 0.0;
+      if (command.startsWith("Antagonist:TriggerTetromino")) { // + digit
         int tetrominoIndex = int.parse(command[command.length-1]);
-        double energyNeeded = 0.4;
+        energyNeeded = 0.4;
         if (energy < energyNeeded) {
           return false;
         }
         if (nextTetrominos.isEmpty) {
           return false;
         }
-        nextTetrominos[0] = Tetromino.fromType(tetrominoIndex, nextTetrominos[0].color, 0);
-        energy -= energyNeeded;
-        print(energy);
-      } else if (command == "Antagonist: ...") {
-        double energyNeeded = 0.4;
+        nextTetrominos[0] = Tetromino.fromType(
+            tetrominoIndex, nextTetrominos[0].color, 0);
+      } else if (command == "Antagonist:SendCombo") {
+        // send 3 tetrominos almost at the same time
+        energyNeeded = 0.7;
+        if (energy < energyNeeded) {
+          //return false;
+        }
+        coolDownFall = 10000;
+        coolDownSpeed = COOL_DOWN_INIT ~/ 4;
+        coolDownUntilReset = 3;
+      } else if (command.startsWith("Antagonist:All")) { // ex: AllTurnLeft
+          energyNeeded = 0.6;
+          if (energy < energyNeeded) {
+            return false;
+          }
+          command = command.substring("Antagonist:All".length);
+          for (Tetromino curTetromino in curTetrominos) {
+            curTetromino.tryToApply(command, curTetrominos, groundSquares,
+                GRID_HEIGHT, GRID_WIDTH);
+          }
+      } else if (command.startsWith("Antagonist:SwitchNext")) { // + 2 digits
+        // switch the tetrominos' shapes (not the colors) from the Next list
+        energyNeeded = 0.1;
         if (energy < energyNeeded) {
           return false;
         }
-        //...
-        energy -= energyNeeded;
+        int i1 = int.parse(command[command.length-2]);
+        int i2 = int.parse(command[command.length-1]);
+        if (nextTetrominos.length < max(i1, i2)) {
+          return false;
+        }
+        Tetromino t = nextTetrominos[i1];
+        nextTetrominos[i1] = nextTetrominos[i2];
+        nextTetrominos[i2] = t;
+        Color c = nextTetrominos[i1].color;
+        nextTetrominos[i1].color = nextTetrominos[i2].color;
+        nextTetrominos[i2].color = c;
+      } else if (command == "Antagonist:SwitchFalling") {
+        // switch the two lowest falling tetrominos' shapes and colors
+        energyNeeded = 0.3;
+        if (energy < energyNeeded) {
+          return false;
+        }
+        List<Tetromino> newCurTetrominos = <Tetromino>[];
+        for (Tetromino tetromino in curTetrominos) {
+          newCurTetrominos.add(tetromino.copy());
+        }
+        int x = newCurTetrominos[0].x;
+        newCurTetrominos[0].x = newCurTetrominos[1].x;
+        newCurTetrominos[1].x = x;
+        int y = newCurTetrominos[0].y;
+        newCurTetrominos[0].y = newCurTetrominos[1].y;
+        newCurTetrominos[1].y = y;
+        Color c = newCurTetrominos[0].color;
+        newCurTetrominos[0].color = newCurTetrominos[1].color;
+        newCurTetrominos[1].color = c;
+        for (Tetromino tetromino in newCurTetrominos) {
+          if (!tetromino.isValid(newCurTetrominos, groundSquares,
+              GRID_HEIGHT, GRID_WIDTH)) {
+            return false;
+          }
+        }
+        curTetrominos = newCurTetrominos;
       } else {
         nextTetrominos[0].color = Colors.grey;
         print("[game_data.dart/applyCommand] Tried to apply an unknown antagonist command");
       }
+      energy -= energyNeeded;
       notifyListeners();
+      return true;
     } else {
+      bool applied = false;
       for (Tetromino curTetromino in curTetrominos) {
         Color playerColor = curTetromino.color;
         if (playerSendingCommand != -1) {
@@ -120,33 +185,48 @@ class GameData with ChangeNotifier {
         }
 
         if (playerColor == curTetromino.color) {
-          if (applied |= curTetromino.tryToApply(command, [], groundSquares,
+          if (applied |= curTetromino.tryToApply(
+              command, curTetrominos, groundSquares,
               GRID_HEIGHT, GRID_WIDTH)) {
             notifyListeners();
           }
         }
       }
+      return applied;
     }
-
-    return applied;
   }
 
   void onPlay(Timer timer) {
-    for (Tetromino curTetromino in curTetrominos) {
-      if (!curTetromino.tryToApply("Down", [], groundSquares,
+    // Change tetrominos which reached the ground into ground squares
+    for (int iCur = curTetrominos.length-1; iCur >= 0; iCur--) {
+      Tetromino curTetromino = curTetrominos[iCur];
+      if (!curTetromino.tryToApply("Down", curTetrominos, groundSquares,
           GRID_HEIGHT, GRID_WIDTH)) {
         if (!curTetromino.addSquaresTo(groundSquares)) {
           // Not fully inside the screen when reached ground squares: game over
-          endGame();
+          return endGame();
         }
         _deleteFullLines();
         _removeFromCurTetrominos(curTetromino);
-        if (!_sendNextTetromino()) {
-          // Can't send next tetromino: game over
-          endGame();
+      }
+    }
+    // if cool down variables allow it, send the next tetromino to the board
+    coolDownFall -= coolDownSpeed;
+    if (curTetrominos.isEmpty || coolDownFall <= 0) {
+      if (!_sendNextTetromino()) {
+        // Can't send next tetromino: game over
+        return endGame();
+      }
+      coolDownFall = COOL_DOWN_INIT;
+      if (coolDownSpeed != 1) {
+        coolDownUntilReset -= 1;
+        if (coolDownUntilReset <= 0) {
+          coolDownSpeed = 1; // reset potential change made by antagonist
         }
       }
     }
+    // increment antagonist energy
+    energy = min(1, energy+0.02);
     notifyListeners();
   }
 
@@ -154,20 +234,28 @@ class GameData with ChangeNotifier {
     return curTetrominos.remove(onGround);
   }
 
+  // Try to send a new tetromino to the board. Returns if a game over happened
   bool _sendNextTetromino() {
-    if (curTetrominos.length > 3) {
+    if (curTetrominos.length >= 3) {
+      // exit the function but don't trigger a game over
       return true;
     }
+
     Tetromino curTetromino = nextTetrominos[0];
     curTetrominos.add(curTetromino);
+    if (coolDownFall < curTetromino.height) {
+      coolDownFall = curTetromino.height;
+    }
     nextTetrominos.remove(curTetromino);
-    _incrementNextPlayer();
     nextTetrominos.add(Tetromino.random(playerColors[nextPlayer]));
+    _incrementNextPlayer();
 
     // Test game over condition
     return !curTetromino.collidesWithGroundSquares(groundSquares);
   }
 
+  // When a line is completed, delete its ground squares
+  // and move one level down all squares above
   void _deleteFullLines() {
     List<bool> tab = List.filled(GRID_HEIGHT*GRID_WIDTH, false);
     List<Color> color = List.filled(GRID_HEIGHT*GRID_WIDTH, Colors.grey);
