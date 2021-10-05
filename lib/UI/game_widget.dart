@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
@@ -29,8 +27,10 @@ class GameWidgetState extends State<GameWidget> {
         onPanEnd: (DragEndDetails d) =>
             Provider.of<GameData>(context, listen: false).applyCommand(
               (d.velocity.pixelsPerSecond.dx < 0) ? "Left" : "Right"),
-        onTapDown: (TapDownDetails d) =>
-            Provider.of<GameData>(context, listen: false).applyCommand("TurnRight"),
+        onTapDown: (TapDownDetails d)
+        {
+        Provider.of<GameData>(context, listen: false).applyCommand("TurnRight");
+          Provider.of<GameData>(context, listen: false).applyCommand("Antagonist:SwitchFalling");},
         child: Container(
           key: _keyGameWidget,
           decoration: GameBoxDecoration(),
@@ -43,9 +43,8 @@ class GameWidgetState extends State<GameWidget> {
   Stack _squareStack() {
     List<Positioned> stackChildren = <Positioned>[];
     List<Square> groundSquares = Provider.of<GameData>(context).groundSquares;
-    Tetromino curTetromino = Provider.of<GameData>(context).curTetromino;
-    List<Square> fallingSquares = curTetromino.rotations[curTetromino.rotationIndex];
-    if (groundSquares.isEmpty && fallingSquares.isEmpty) {
+    List<Tetromino> curTetrominos = Provider.of<GameData>(context).curTetrominos;
+    if (groundSquares.isEmpty && curTetrominos.isEmpty) {
       return Stack(children: stackChildren);
     }
 
@@ -66,18 +65,21 @@ class GameWidgetState extends State<GameWidget> {
       );
     }
 
-    for (Square square in fallingSquares) {
-      stackChildren.add(
-        Positioned(
-          left: (square.x+curTetromino.x) * width,
-          top: (square.y+curTetromino.y) * width,
-          child: Container(
-            width: width - 1,
-            height: width - 1,
-            decoration: BoxDecoration(color: square.color),
-          ),
-        )
-      );
+    for (Tetromino curTetromino in curTetrominos) {
+      List<Square> fallingSquares = curTetromino.rotations[curTetromino.rotationIndex];
+      for (Square square in fallingSquares) {
+        stackChildren.add(
+            Positioned(
+              left: (square.x + curTetromino.x) * width,
+              top: (square.y + curTetromino.y) * width,
+              child: Container(
+                width: width - 1,
+                height: width - 1,
+                decoration: BoxDecoration(color: square.color),
+              ),
+            )
+        );
+      }
     }
 
     stackChildren.add(

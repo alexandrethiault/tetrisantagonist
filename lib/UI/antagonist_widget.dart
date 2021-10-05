@@ -30,7 +30,7 @@ class _AntagonistState extends State<Antagonist> {
           fit : BoxFit.contain,
           child: Flame.util.animationAsWidget(
               Position(WIDTH, HEIGHT),
-              animation.Animation.sequenced('nemesis.png', AMOUNT,
+              animation.Animation.sequenced('../nemesis.png', AMOUNT,
                   textureWidth: WIDTH, textureHeight: HEIGHT)),
         ));
   }

@@ -77,7 +77,7 @@ class Tetromino {
         }
       }
     }
-    x = 5-width~/2-minX;
+    x = 10-width~/2-minX;
     y = -maxY;
   }
 
@@ -157,7 +157,9 @@ class Tetromino {
 
   // Apply command without safe-checking anything
   void _apply(String command) {
-    if (command == "Down") {
+    if (command == "Nothing") {
+      // do nothing
+    } else if (command == "Down") {
       y += 1;// y=0 = top of the screen
     } else if (command == "Right") {
       x += 1;
@@ -218,6 +220,11 @@ class Tetromino {
       return true;
     }
     return false;
+  }
+
+  bool isValid(List<Tetromino> currentTetrominoes,
+      List<Square> groundSquares, int gridHeight, int gridWidth) {
+    return _canApply("Nothing", currentTetrominoes, groundSquares, gridHeight, gridWidth);
   }
 
   bool collidesWithOther(Tetromino other) {

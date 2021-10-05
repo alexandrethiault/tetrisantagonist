@@ -6,8 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
-import 'package:provider/provider.dart';
-import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'package:tetrisserver/constants/ui_constants.dart';
 
 import '../main.dart';
@@ -47,65 +45,68 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-            itemCount: getItemCount(),
-            itemBuilder: (context, index) {
-              final device = widget.deviceType == DeviceType.host
-                  ? connectedDevices[index]
-                  : devices[index];
-              return Container(
-                margin: EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                            child: GestureDetector(
-                              onTap: () => _onTabItemListener(device),
-                              child: Column(
-                                children: [
-                                  Text(device.deviceName),
-                                  Text(
-                                    getStateName(device.state),
-                                    style: TextStyle(
-                                        color: getStateColor(device.state)),
-                                  ),
-                                ],
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                              ),
-                            )),
-                        // Request connect
-                        GestureDetector(
-                          onTap: () => _onButtonClicked(device),
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 8.0),
-                            padding: EdgeInsets.all(8.0),
-                            height: 35,
-                            width: 100,
-                            color: getButtonColor(device.state),
-                            child: Center(
-                              child: Text(
-                                getButtonStateName(device.state),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
+    return SizedBox(
+      height: 200,
+      child: ListView.builder(
+          itemCount: getItemCount(),
+          itemBuilder: (context, index) {
+            final device = widget.deviceType == DeviceType.host
+                ? connectedDevices[index]
+                : devices[index];
+            return Container(
+              margin: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                          child: GestureDetector(
+                        onTap: () => _onTabItemListener(device),
+                        child: Column(
+                          children: [
+                            Text(device.deviceName),
+                            Text(
+                              getStateName(device.state),
+                              style:
+                                  TextStyle(color: getStateColor(device.state)),
+                            ),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      )),
+                      // Request connect
+                      GestureDetector(
+                        onTap: () => _onButtonClicked(device),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.all(8.0),
+                          height: 35,
+                          width: 100,
+                          color: getButtonColor(device.state),
+                          child: Center(
+                            child: Text(
+                              getButtonStateName(device.state),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    Divider(
-                      height: 1,
-                      color: Colors.grey,
-                    )
-                  ],
-                ),
-              );
-            });
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 8.0,
+                  ),
+                  const Divider(
+                    height: 1,
+                    color: Colors.grey,
+                  )
+                ],
+              ),
+            );
+          }),
+    );
   }
 
   String getStateName(SessionState state) {
@@ -157,17 +158,17 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
           builder: (BuildContext context) {
             final myController = TextEditingController();
             return AlertDialog(
-              title: Text("Send message"),
+              title: const Text("Send message"),
               content: TextField(controller: myController),
               actions: [
                 TextButton(
-                  child: Text("Cancel"),
+                  child: const Text("Cancel"),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
-                  child: Text("Send"),
+                  child: const Text("Send"),
                   onPressed: () {
                     nearbyService.sendMessage(
                         device.deviceId, myController.text);
@@ -223,14 +224,13 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
         callback: (isRunning) async {
           if (isRunning) {
             if (widget.deviceType == DeviceType.player) {
-
               await nearbyService.stopBrowsingForPeers();
-              await Future.delayed(Duration(microseconds: 200));
+              await Future.delayed(const Duration(microseconds: 200));
               await nearbyService.startBrowsingForPeers();
             } else {
               await nearbyService.stopAdvertisingPeer();
               await nearbyService.stopBrowsingForPeers();
-              await Future.delayed(Duration(microseconds: 200));
+              await Future.delayed(const Duration(microseconds: 200));
               await nearbyService.startAdvertisingPeer();
               await nearbyService.startBrowsingForPeers();
             }
@@ -238,39 +238,39 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
         });
     subscription =
         nearbyService.stateChangedSubscription(callback: (devicesList) {
-          devicesList.forEach((element) {
-            print(
-                " deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
+      devicesList.forEach((element) {
+        print(
+            " deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
 
-            if (Platform.isAndroid) {
-              if (element.state == SessionState.connected) {
-                nearbyService.stopBrowsingForPeers();
-              } else {
-                nearbyService.startBrowsingForPeers();
-              }
-            }
-          });
+        if (Platform.isAndroid) {
+          if (element.state == SessionState.connected) {
+            nearbyService.stopBrowsingForPeers();
+          } else {
+            nearbyService.startBrowsingForPeers();
+          }
+        }
+      });
 
-          setState(() {
-            devices.clear();
-            devices.addAll(devicesList);
-            connectedDevices.clear();
-            connectedDevices.addAll(devicesList
-                .where((d) => d.state == SessionState.connected)
-                .toList());
-          });
-        });
+      setState(() {
+        devices.clear();
+        devices.addAll(devicesList);
+        connectedDevices.clear();
+        connectedDevices.addAll(devicesList
+            .where((d) => d.state == SessionState.connected)
+            .toList());
+      });
+    });
 
     receivedDataSubscription =
         nearbyService.dataReceivedSubscription(callback: (data) {
-          print("dataReceivedSubscription: ${jsonEncode(data)}");
-          print(Message.fromJson(data).message.toString());
-          gameData.applyCommand(Message.fromJson(data).message.toString());
-          showToast(jsonEncode(data),
-              context: context,
-              axis: Axis.horizontal,
-              alignment: Alignment.center,
-              position: StyledToastPosition.bottom);
-        });
+      print("dataReceivedSubscription: ${jsonEncode(data)}");
+      print(Message.fromJson(data).message.toString());
+      gameData.applyCommand(Message.fromJson(data).message.toString());
+      showToast(jsonEncode(data),
+          context: context,
+          axis: Axis.horizontal,
+          alignment: Alignment.center,
+          position: StyledToastPosition.bottom);
+    });
   }
 }
