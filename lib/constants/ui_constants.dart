@@ -10,4 +10,10 @@ const Color BACKGROUND_COLOR = Colors.blueGrey;
 const Color BORDERS_COLOR = Colors.red;
 const String FONT = "Courier";
 
+
+const double ANTAGONIST_WIDTH = 64;
+const double ANTAGONIST_HEIGHT = 64;
+const double ANTAGONIST_FRAME_WIDTH = 64;
+const int ANTAGONIST_AMOUNT = 4;
+
 enum DeviceType { host, player }

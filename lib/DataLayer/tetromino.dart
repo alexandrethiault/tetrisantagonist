@@ -51,6 +51,7 @@ class Tetromino {
   int y = 0;
   int rotationIndex = 0; // between 0 and 3
   List<List<Square>> rotations = <List<Square>>[]; // list of 4 rotations
+  bool _isFrozen = false;
 
   Tetromino(this.rotations, this.rotationIndex) {
     x = 3;
@@ -64,7 +65,7 @@ class Tetromino {
     rotations = [[],[],[],[]];
   }
 
-  Tetromino.fromType(int type, Color color, [this.rotationIndex=0]) {
+  Tetromino.fromType(int type, Color color, [this.rotationIndex=0, int dropIndex=2]) {
     String string = tetrominoes;
     List<String> lines = string.split('\n');
     rotations = [[],[],[],[]];
@@ -77,12 +78,13 @@ class Tetromino {
         }
       }
     }
-    x = 10-width~/2-minX;
-    y = -maxY;
+
+    x = 5*dropIndex-width~/2-minX;
+    y = 5-maxY;
   }
 
-  Tetromino.random(Color color) :
-        this.fromType(Random().nextInt(7), color, Random().nextInt(4));
+  Tetromino.random(Color color, [int dropIndex=2]) :
+        this.fromType(Random().nextInt(7), color, Random().nextInt(4), dropIndex);
 
   Tetromino copy() {
     Tetromino copy = Tetromino(rotations, rotationIndex);
@@ -91,9 +93,7 @@ class Tetromino {
     return copy;
   }
 
-  Color get color {
-    return rotations[0][0].color;
-  }
+  Color get color => rotations[0][0].color;
 
   set color(Color color) {
     for (var orientation in rotations) {
@@ -103,9 +103,7 @@ class Tetromino {
     }
   }
 
-  get baseSquares {
-    return rotations[rotationIndex];
-  }
+  get baseSquares => rotations[rotationIndex];
 
   get squares {
     List<Square> list = <Square>[];
@@ -131,9 +129,7 @@ class Tetromino {
     return minX;
   }
 
-  int get width {
-    return maxX - minX + 1;
-  }
+  int get width => maxX - minX + 1;
 
   int get maxY {
     int maxY = 0;
@@ -151,8 +147,12 @@ class Tetromino {
     return minY;
   }
 
-  int get height {
-    return maxX - minX + 1;
+  int get height => maxX - minX + 1;
+
+  bool get isFrozen => _isFrozen;
+
+  void freeze() {
+    _isFrozen = true;
   }
 
   // Apply command without safe-checking anything
@@ -166,9 +166,11 @@ class Tetromino {
     } else if (command == "Left") {
       x -= 1;
     } else if (command == "TurnRight") {
+      if (isFrozen) return;
       rotationIndex++;
       if (rotationIndex == 4) rotationIndex = 0;
     } else if (command == "TurnLeft") {
+      if (isFrozen) return;
       if (rotationIndex == 0) rotationIndex = 4;
       rotationIndex--;
     } else {

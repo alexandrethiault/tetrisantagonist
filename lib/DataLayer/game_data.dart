@@ -20,7 +20,6 @@ class GameData with ChangeNotifier {
   List<Color> playerColors = [
     Colors.orange, Colors.blue, Colors.green, Colors.yellow];
 
-  int nextPlayer = 1;
   List<Tetromino> curTetrominos = <Tetromino>[];
   List<Tetromino> nextTetrominos = <Tetromino>[];
   List<Square> groundSquares = <Square>[];
@@ -30,6 +29,11 @@ class GameData with ChangeNotifier {
 
   int antagonist = 0;
   double energy = 0.0;
+
+  int nextPlayer = 1;
+  int nextDropIndex = 2;
+
+  bool gameIsOver = false;
 
   Timer timer = Timer.periodic(DURATION, (timer) => {});
 
@@ -48,22 +52,49 @@ class GameData with ChangeNotifier {
     notifyListeners();
   }
 
+  int realDropIndex() {
+    int dropIndex = nextDropIndex;
+    if (dropIndex == 0) {
+      dropIndex = 2;
+    }
+    return dropIndex;
+  }
+
+  int oldDropIndex() {
+    int dropIndex = (nextDropIndex + 1) % 4;
+    if (dropIndex == 0) {
+      dropIndex = 2;
+    }
+    return dropIndex;
+  }
+
+  void _incrementDropIndex() {
+    nextDropIndex++;
+    if (nextDropIndex == 4)  nextDropIndex = 0;
+  }
+
+  void _decrementDropIndex() {
+    nextDropIndex--;
+    if (nextDropIndex == -1)  nextDropIndex = 3;
+  }
+
   void startGame(double screenWidth) {
     isLaunched = true;
     roundNumber++;
     for (var i in [0,1,2,3]) {
       scores[i] = 0;
     }
+    nextDropIndex = 1;
 
     for (int _ in [0,1,2]) {
-      nextTetrominos.add(Tetromino.random(playerColors[nextPlayer]));
+      nextTetrominos.add(Tetromino.random(playerColors[nextPlayer], realDropIndex()));
+      _incrementDropIndex();
       _incrementNextPlayer();
     }
 
     coolDownFall = 0;
     coolDownSpeed = 1;
     coolDownUntilReset = 0;
-    //_sendNextTetromino();
 
     groundSquares = <Square>[];
 
@@ -74,7 +105,22 @@ class GameData with ChangeNotifier {
     notifyListeners();
   }
 
+  void triggerGameOver() {
+    gameIsOver = true;
+
+    _decrementDropIndex();
+
+    curTetrominos.clear();
+    nextTetrominos.clear();
+
+    timer.cancel();
+    timer = Timer.periodic(DURATION, onGameOver);
+
+    notifyListeners();
+  }
+
   void endGame() {
+    gameIsOver = false;
     isLaunched = false;
 
     _incrementAntagonist();
@@ -96,8 +142,10 @@ class GameData with ChangeNotifier {
 
     if (command.startsWith("Antagonist:")) {
       double energyNeeded = 0.0;
-      if (command.startsWith("Antagonist:TriggerTetromino")) { // + digit
-        int tetrominoIndex = int.parse(command[command.length-1]);
+      if (command.startsWith("Antagonist:TriggerTetromino")) { // + digit [0..7] + digit [1..3]
+        // replace tetromino from nextTetrominoes list.
+        int tetrominoIndex = int.parse(command[command.length-2]);
+        int nextIndex = int.parse(command[command.length-1])-1;
         energyNeeded = 0.4;
         if (energy < energyNeeded) {
           return false;
@@ -105,16 +153,16 @@ class GameData with ChangeNotifier {
         if (nextTetrominos.isEmpty) {
           return false;
         }
-        nextTetrominos[0] = Tetromino.fromType(
+        nextTetrominos[nextIndex] = Tetromino.fromType(
             tetrominoIndex, nextTetrominos[0].color, 0);
       } else if (command == "Antagonist:SendCombo") {
         // send 3 tetrominos almost at the same time
         energyNeeded = 0.7;
         if (energy < energyNeeded) {
-          //return false;
+          return false;
         }
         coolDownFall = 10000;
-        coolDownSpeed = COOL_DOWN_INIT ~/ 4;
+        coolDownSpeed = COOL_DOWN_INIT ~/ 2;
         coolDownUntilReset = 3;
       } else if (command.startsWith("Antagonist:All")) { // ex: AllTurnLeft
           energyNeeded = 0.6;
@@ -126,14 +174,22 @@ class GameData with ChangeNotifier {
             curTetromino.tryToApply(command, curTetrominos, groundSquares,
                 GRID_HEIGHT, GRID_WIDTH);
           }
-      } else if (command.startsWith("Antagonist:SwitchNext")) { // + 2 digits
+      } else if (command.startsWith("Antagonist:Freeze")) { // + digit [1..3]
+        // The player won't be able to rotate this tetromino
+        energyNeeded = 0.5;
+        if (energy < energyNeeded) {
+          return false;
+        }
+        int nextIndex = int.parse(command[command.length-1])-1;
+        nextTetrominos[nextIndex].freeze();
+      } else if (command.startsWith("Antagonist:SwitchNext")) { // + digit [1..3] + digit [1..3]
         // switch the tetrominos' shapes (not the colors) from the Next list
         energyNeeded = 0.1;
         if (energy < energyNeeded) {
           return false;
         }
-        int i1 = int.parse(command[command.length-2]);
-        int i2 = int.parse(command[command.length-1]);
+        int i1 = int.parse(command[command.length-2])-1;
+        int i2 = int.parse(command[command.length-1])-1;
         if (nextTetrominos.length < max(i1, i2)) {
           return false;
         }
@@ -204,7 +260,7 @@ class GameData with ChangeNotifier {
           GRID_HEIGHT, GRID_WIDTH)) {
         if (!curTetromino.addSquaresTo(groundSquares)) {
           // Not fully inside the screen when reached ground squares: game over
-          return endGame();
+          return triggerGameOver();
         }
         _deleteFullLines();
         _removeFromCurTetrominos(curTetromino);
@@ -215,7 +271,7 @@ class GameData with ChangeNotifier {
     if (curTetrominos.isEmpty || coolDownFall <= 0) {
       if (!_sendNextTetromino()) {
         // Can't send next tetromino: game over
-        return endGame();
+        return triggerGameOver();
       }
       coolDownFall = COOL_DOWN_INIT;
       if (coolDownSpeed != 1) {
@@ -226,7 +282,22 @@ class GameData with ChangeNotifier {
       }
     }
     // increment antagonist energy
-    energy = min(1, energy+0.02);
+    energy = min(1, energy+0.005);
+    notifyListeners();
+  }
+
+  void onGameOver(Timer timer) {
+    notifyListeners();
+    Color curColor = groundSquares[0].color;
+    if (curColor != Colors.grey) {
+      for (Square square in groundSquares) {
+        square.color = Colors.grey;
+      }
+    } else {
+      for (Square square in groundSquares) {
+        square.color = Colors.yellow;
+      }
+    }
     notifyListeners();
   }
 
@@ -247,7 +318,8 @@ class GameData with ChangeNotifier {
       coolDownFall = curTetromino.height;
     }
     nextTetrominos.remove(curTetromino);
-    nextTetrominos.add(Tetromino.random(playerColors[nextPlayer]));
+    nextTetrominos.add(Tetromino.random(playerColors[nextPlayer], realDropIndex()));
+    _incrementDropIndex();
     _incrementNextPlayer();
 
     // Test game over condition

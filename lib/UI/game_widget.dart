@@ -8,7 +8,6 @@ import 'package:tetrisserver/UI/antagonist_widget.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 
-
 class GameWidget extends StatefulWidget {
   const GameWidget({Key? key}) : super(key: key);
 
@@ -22,15 +21,17 @@ class GameWidgetState extends State<GameWidget> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 1.0*GRID_WIDTH/GRID_HEIGHT,
+      aspectRatio: 1.0 * GRID_WIDTH / GRID_HEIGHT,
       child: GestureDetector(
         onPanEnd: (DragEndDetails d) =>
             Provider.of<GameData>(context, listen: false).applyCommand(
-              (d.velocity.pixelsPerSecond.dx < 0) ? "Left" : "Right"),
-        onTapDown: (TapDownDetails d)
-        {
-        Provider.of<GameData>(context, listen: false).applyCommand("TurnRight");
-          Provider.of<GameData>(context, listen: false).applyCommand("Antagonist:SwitchFalling");},
+                (d.velocity.pixelsPerSecond.dx < 0) ? "Left" : "Right"),
+        onTapDown: (TapDownDetails d) {
+          Provider.of<GameData>(context, listen: false)
+              .applyCommand("TurnRight");
+          Provider.of<GameData>(context, listen: false)
+              .applyCommand("Antagonist:Freeze1");
+        },
         child: Container(
           key: _keyGameWidget,
           decoration: GameBoxDecoration(),
@@ -43,53 +44,70 @@ class GameWidgetState extends State<GameWidget> {
   Stack _squareStack() {
     List<Positioned> stackChildren = <Positioned>[];
     List<Square> groundSquares = Provider.of<GameData>(context).groundSquares;
-    List<Tetromino> curTetrominos = Provider.of<GameData>(context).curTetrominos;
+    List<Tetromino> curTetrominos =
+        Provider.of<GameData>(context).curTetrominos;
     if (groundSquares.isEmpty && curTetrominos.isEmpty) {
       return Stack(children: stackChildren);
     }
 
-    final RenderBox renderBoxTetris = _keyGameWidget.currentContext!.findRenderObject() as RenderBox;
-    double width = (renderBoxTetris.size.width - 2*DEFAULT_BORDER_WIDTH)/ GRID_WIDTH;
+    final RenderBox renderBoxTetris =
+        _keyGameWidget.currentContext!.findRenderObject() as RenderBox;
+    double width =
+        (renderBoxTetris.size.width - 2 * DEFAULT_BORDER_WIDTH) / GRID_WIDTH;
 
     for (Square square in groundSquares) {
-      stackChildren.add(
-        Positioned(
-          left: square.x * width,
-          top: square.y * width,
-          child: Container(
-            width: width - 1,
-            height: width - 1,
-            decoration: BoxDecoration(color: square.color),
-          ),
-        )
-      );
+      stackChildren.add(Positioned(
+        left: square.x * width,
+        top: square.y * width,
+        child: Container(
+          width: width - 1,
+          height: width - 1,
+          decoration: BoxDecoration(color: square.color),
+        ),
+      ));
     }
 
     for (Tetromino curTetromino in curTetrominos) {
-      List<Square> fallingSquares = curTetromino.rotations[curTetromino.rotationIndex];
+      List<Square> fallingSquares =
+          curTetromino.rotations[curTetromino.rotationIndex];
       for (Square square in fallingSquares) {
         stackChildren.add(
-            Positioned(
-              left: (square.x + curTetromino.x) * width,
-              top: (square.y + curTetromino.y) * width,
-              child: Container(
-                width: width - 1,
-                height: width - 1,
-                decoration: BoxDecoration(color: square.color),
+          Positioned(
+            left: (square.x + curTetromino.x) * width,
+            top: (square.y + curTetromino.y) * width,
+            child: Container(
+              width: width - 1,
+              height: width - 1,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color:
+                      (curTetromino.isFrozen) ? Colors.grey : Colors.black12,
+                  width: 3.0,
+                ),
+                color: square.color
               ),
             )
+          )
         );
       }
     }
 
-    stackChildren.add(
-        const Positioned(
-          top: 0,
-          child: Antagonist(),
-        )
-    );
+    double antagonistLeftConstraint = width * GRID_WIDTH / 4;
+    int oldIndex = Provider.of<GameData>(context).oldDropIndex();
+    antagonistLeftConstraint = width * GRID_WIDTH / 4 * oldIndex - 5 * width;
 
-    return Stack(children: stackChildren);
+    return Stack(children: [
+      ...stackChildren,
+      AnimatedPositioned(
+        top: 0,
+        left: antagonistLeftConstraint,
+        duration: const Duration(milliseconds: 200),
+        child: SizedBox(
+          height: width * 10,
+          width: width * 10,
+          child: const Antagonist(),
+        ),
+      ),
+    ]);
   }
-
 }
