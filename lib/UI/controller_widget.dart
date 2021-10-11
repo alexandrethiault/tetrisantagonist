@@ -23,10 +23,13 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   List<Device> devices = [];
   List<Device> connectedDevices = [];
   bool connected = false;
+  PlayerRole role = PlayerRole.awaiting;
   late Device currentHost;
   late NearbyService nearbyService;
   late StreamSubscription subscription;
   late StreamSubscription receivedDataSubscription;
+
+  Color playerColor = Colors.red;
 
   @override
   void initState() {
@@ -42,6 +45,124 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     super.dispose();
   }
 
+  Widget foeInterface() {
+    return Container(
+      color: Colors.black,
+    );
+  }
+
+  Widget playerInterface(double buttonSize) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          InkWell(
+            onTap: moveLeft,
+            child: Container(
+                width: buttonSize,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Icon(Icons.arrow_back_ios),
+                )),
+          ),
+          InkWell(
+            onTap: rotateLeft,
+            child: Container(
+                width: buttonSize,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Icon(Icons.rotate_left),
+                )),
+          ),
+          Spacer(),
+          InkWell(
+            onTap: rotateRight,
+            child: Container(
+                width: buttonSize,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Icon(Icons.rotate_right),
+                )),
+          ),
+          InkWell(
+            onTap: moveRight,
+            child: Container(
+                width: buttonSize,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Icon(Icons.arrow_forward_ios),
+                )),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget p2pListView() {
+    return Container(
+      color: Colors.white54,
+      width: 250,
+      height: 100,
+      child: ListView.builder(
+          itemCount: getItemCount(),
+          itemBuilder: (context, index) {
+            final device = devices[index];
+            return Container(
+              margin: EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                          child: GestureDetector(
+                        onTap: () => _onTabItemListener(device),
+                        child: Column(
+                          children: [
+                            Text(device.deviceName),
+                            Text(
+                              getStateName(device.state),
+                              style:
+                                  TextStyle(color: getStateColor(device.state)),
+                            ),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      )),
+                      // Request connect
+                      GestureDetector(
+                        onTap: () => _onButtonClicked(device),
+                        child: Container(
+                          margin: EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: EdgeInsets.all(8.0),
+                          height: 35,
+                          width: 100,
+                          color: getButtonColor(device.state),
+                          child: Center(
+                            child: Text(
+                              getButtonStateName(device.state),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 8.0,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: Colors.grey,
+                  )
+                ],
+              ),
+            );
+          }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -51,136 +172,18 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     return SafeArea(
       child: Scaffold(
         body: Container(
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Flexible(
-              flex: 1,
+          color: playerColor,
+          child: Stack(alignment: Alignment.topCenter, children: [
+            Center(
               child: connected
-                  ? InkWell(
-                      onTapDown: (d) => moveLeft,
-                      child: Container(
-                          width: 100,
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: Icon(Icons.arrow_back_ios),
-                          )),
-                    )
-                  : Container(
-                      width: 100,
-                    ),
+                  ? role == PlayerRole.player
+                      ? playerInterface(MediaQuery.of(context).size.width / 6)
+                      : foeInterface()
+                  : Text("Awaiting for role"),
             ),
-            Flexible(
-              flex: 1,
-              child: connected
-                  ? InkWell(
-                onTap: rotateLeft,
-                child: Container(
-                    width: 100,
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Icon(Icons.rotate_left),
-                    )),
-              )
-                  : Container(
-                width: 100,
-              ),
-            ),
-            Expanded(
-                flex: 4,
-                child: GestureDetector(
-                  child: Container(
-                    child: ListView.builder(
-                        itemCount: getItemCount(),
-                        itemBuilder: (context, index) {
-                          final device = devices[index];
-                          return Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                        child: GestureDetector(
-                                      onTap: () => _onTabItemListener(device),
-                                      child: Column(
-                                        children: [
-                                          Text(device.deviceName),
-                                          Text(
-                                            getStateName(device.state),
-                                            style: TextStyle(
-                                                color: getStateColor(
-                                                    device.state)),
-                                          ),
-                                        ],
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                      ),
-                                    )),
-                                    // Request connect
-                                    GestureDetector(
-                                      onTap: () => _onButtonClicked(device),
-                                      child: Container(
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 8.0),
-                                        padding: EdgeInsets.all(8.0),
-                                        height: 35,
-                                        width: 100,
-                                        color: getButtonColor(device.state),
-                                        child: Center(
-                                          child: Text(
-                                            getButtonStateName(device.state),
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 8.0,
-                                ),
-                                Divider(
-                                  height: 1,
-                                  color: Colors.grey,
-                                )
-                              ],
-                            ),
-                          );
-                        }),
-                  ),
-                )),
-            Flexible(
-              flex: 1,
-              child: connected
-                  ? InkWell(
-                onTap: rotateRight,
-                child: Container(
-                    width: 100,
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Icon(Icons.rotate_right),
-                    )),
-              )
-                  : Container(
-                width: 100,
-              ),
-            ),
-            Flexible(
-              flex: 1,
-              child: connected
-                  ? InkWell(
-                      onTap: moveRight,
-                      child: Container(
-                          width: 100,
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: Icon(Icons.arrow_forward_ios),
-                          )),
-                    )
-                  : Container(
-                      width: 100,
-                    ),
+            Positioned(
+              top: 0,
+              child: p2pListView(),
             ),
           ]),
         ),
@@ -259,6 +262,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     receivedDataSubscription =
         nearbyService.dataReceivedSubscription(callback: (data) {
       print("dataReceivedSubscription: ${jsonEncode(data)}");
+      applyCommand(Message.fromJson(data).message.toString());
       showToast(jsonEncode(data),
           context: context,
           axis: Axis.horizontal,
@@ -344,7 +348,6 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   _onButtonClicked(Device device) {
-
     switch (device.state) {
       case SessionState.notConnected:
         nearbyService.invitePeer(
@@ -360,6 +363,17 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
         break;
       case SessionState.connecting:
         break;
+    }
+  }
+
+  void applyCommand(String command) {
+    if (command.startsWith("id")) {
+      playerColor = playerColors[int.parse(command[command.length - 1])];
+    }
+    ;
+    if (command.startsWith("r")) // what role player has
+    {
+      setState(() => role = command.substring(2) == "PlayerRole.player" ? PlayerRole.player: PlayerRole.foe);
     }
   }
 }

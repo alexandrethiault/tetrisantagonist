@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 
 import 'square.dart';
 import 'tetromino.dart';
@@ -13,6 +14,9 @@ const int COOL_DOWN_INIT = 15;
 
 // data that can't stay inside GameState and must be exposed to other widgets
 class GameData with ChangeNotifier {
+
+  late NearbyService nearbyService;
+
   bool isLaunched = false;
   int roundNumber = 0;
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 
-import 'game_widget.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 

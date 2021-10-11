@@ -22,7 +22,6 @@ class DevicesListScreen extends StatefulWidget {
 class _DevicesListScreenState extends State<DevicesListScreen> {
   List<Device> devices = [];
   List<Device> connectedDevices = [];
-  late NearbyService nearbyService;
   late StreamSubscription subscription;
   late StreamSubscription receivedDataSubscription;
 
@@ -38,8 +37,8 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
   void dispose() {
     subscription.cancel();
     receivedDataSubscription.cancel();
-    nearbyService.stopBrowsingForPeers();
-    nearbyService.stopAdvertisingPeer();
+    gameData.nearbyService.stopBrowsingForPeers();
+    gameData.nearbyService.stopAdvertisingPeer();
     super.dispose();
   }
 
@@ -170,7 +169,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                 TextButton(
                   child: const Text("Send"),
                   onPressed: () {
-                    nearbyService.sendMessage(
+                    gameData.nearbyService.sendMessage(
                         device.deviceId, myController.text);
                     myController.text = '';
                   },
@@ -192,13 +191,13 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
   _onButtonClicked(Device device) {
     switch (device.state) {
       case SessionState.notConnected:
-        nearbyService.invitePeer(
+        gameData.nearbyService.invitePeer(
           deviceID: device.deviceId,
           deviceName: device.deviceName,
         );
         break;
       case SessionState.connected:
-        nearbyService.disconnectPeer(deviceID: device.deviceId);
+        gameData.nearbyService.disconnectPeer(deviceID: device.deviceId);
         break;
       case SessionState.connecting:
         break;
@@ -206,7 +205,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
   }
 
   void init() async {
-    nearbyService = NearbyService();
+    gameData.nearbyService = NearbyService();
     String devInfo = '';
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
@@ -217,36 +216,37 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       devInfo = iosInfo.localizedModel!;
     }
-    await nearbyService.init(
+    await gameData.nearbyService.init(
         serviceType: 'mpconn',
         deviceName: devInfo,
         strategy: Strategy.P2P_CLUSTER,
         callback: (isRunning) async {
           if (isRunning) {
             if (widget.deviceType == DeviceType.player) {
-              await nearbyService.stopBrowsingForPeers();
+              await gameData.nearbyService.stopBrowsingForPeers();
               await Future.delayed(const Duration(microseconds: 200));
-              await nearbyService.startBrowsingForPeers();
+              await gameData.nearbyService.startBrowsingForPeers();
             } else {
-              await nearbyService.stopAdvertisingPeer();
-              await nearbyService.stopBrowsingForPeers();
+              await gameData.nearbyService.stopAdvertisingPeer();
+              await gameData.nearbyService.stopBrowsingForPeers();
               await Future.delayed(const Duration(microseconds: 200));
-              await nearbyService.startAdvertisingPeer();
-              await nearbyService.startBrowsingForPeers();
+              await gameData.nearbyService.startAdvertisingPeer();
+              await gameData.nearbyService.startBrowsingForPeers();
             }
           }
         });
     subscription =
-        nearbyService.stateChangedSubscription(callback: (devicesList) {
+        gameData.nearbyService.stateChangedSubscription(callback: (devicesList) {
       devicesList.forEach((element) {
         print(
             " deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
-
+        gameData.nearbyService.sendMessage(element.deviceId, 'id=${connectedDevices.length}');
+        gameData.nearbyService.sendMessage(element.deviceId, 'r=${PlayerRole.player}');
         if (Platform.isAndroid) {
           if (element.state == SessionState.connected) {
-            nearbyService.stopBrowsingForPeers();
+            gameData.nearbyService.stopBrowsingForPeers();
           } else {
-            nearbyService.startBrowsingForPeers();
+            gameData.nearbyService.startBrowsingForPeers();
           }
         }
       });
@@ -262,7 +262,7 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
     });
 
     receivedDataSubscription =
-        nearbyService.dataReceivedSubscription(callback: (data) {
+        gameData.nearbyService.dataReceivedSubscription(callback: (data) {
       print("dataReceivedSubscription: ${jsonEncode(data)}");
       print(Message.fromJson(data).message.toString());
       gameData.applyCommand(Message.fromJson(data).message.toString());
