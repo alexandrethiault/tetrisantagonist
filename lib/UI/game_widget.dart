@@ -8,6 +8,8 @@ import 'package:tetrisserver/UI/antagonist_widget.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 
+// the game grid widget, including tetrominos falling and fallen
+
 class GameWidget extends StatefulWidget {
   const GameWidget({Key? key}) : super(key: key);
 
@@ -22,15 +24,13 @@ class GameWidgetState extends State<GameWidget> {
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 1.0 * GRID_WIDTH / GRID_HEIGHT,
-      child: GestureDetector(
+      child: GestureDetector( // todo remove the gesture detector, that is for testing
         onPanEnd: (DragEndDetails d) =>
             Provider.of<GameData>(context, listen: false).applyCommand(
                 (d.velocity.pixelsPerSecond.dx < 0) ? "Left" : "Right"),
         onTapDown: (TapDownDetails d) {
           Provider.of<GameData>(context, listen: false)
               .applyCommand("TurnRight");
-          Provider.of<GameData>(context, listen: false)
-              .applyCommand("Antagonist:Freeze1");
         },
         child: Container(
           key: _keyGameWidget,
@@ -62,7 +62,7 @@ class GameWidgetState extends State<GameWidget> {
         child: Container(
           width: width - 1,
           height: width - 1,
-          decoration: BoxDecoration(color: square.color),
+          decoration: SquareDecoration(square.color),
         ),
       ));
     }
@@ -78,14 +78,7 @@ class GameWidgetState extends State<GameWidget> {
             child: Container(
               width: width - 1,
               height: width - 1,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color:
-                      (curTetromino.isFrozen) ? Colors.grey : Colors.black12,
-                  width: 3.0,
-                ),
-                color: square.color
-              ),
+              decoration: SquareDecoration(square.color, curTetromino.isFrozen),
             )
           )
         );

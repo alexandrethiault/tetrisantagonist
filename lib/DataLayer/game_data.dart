@@ -50,12 +50,13 @@ class GameData with ChangeNotifier {
 
   void _incrementAntagonist() {
     antagonist++;
-    if (antagonist == 4)  antagonist = 0;
+    if (antagonist == 4) antagonist = 0;
     nextPlayer = antagonist+1;
-    if (nextPlayer == 4)  nextPlayer = 0;
+    if (nextPlayer == 4) nextPlayer = 0;
     notifyListeners();
   }
 
+  // 1 or 2 or 3, used to know where to place the next tetromino horizontally
   int realDropIndex() {
     int dropIndex = nextDropIndex;
     if (dropIndex == 0) {
@@ -64,6 +65,8 @@ class GameData with ChangeNotifier {
     return dropIndex;
   }
 
+  // when a tetromino appears, 3 other tetrominos have been generated
+  // so we need another function that accounts for this lag
   int oldDropIndex() {
     int dropIndex = (nextDropIndex + 1) % 4;
     if (dropIndex == 0) {
@@ -77,6 +80,8 @@ class GameData with ChangeNotifier {
     if (nextDropIndex == 4)  nextDropIndex = 0;
   }
 
+  // Antagonist widget is normally one step above the current falling tetromino
+  // But it must go back to last tetromino when the game is over
   void _decrementDropIndex() {
     nextDropIndex--;
     if (nextDropIndex == -1)  nextDropIndex = 3;
@@ -291,7 +296,7 @@ class GameData with ChangeNotifier {
   }
 
   void onGameOver(Timer timer) {
-    notifyListeners();
+    // Create a lightning effect by making squares switch between yellow and grey
     Color curColor = groundSquares[0].color;
     if (curColor != Colors.grey) {
       for (Square square in groundSquares) {
@@ -312,6 +317,7 @@ class GameData with ChangeNotifier {
   // Try to send a new tetromino to the board. Returns if a game over happened
   bool _sendNextTetromino() {
     if (curTetrominos.length >= 3) {
+      // avoid having 2 tetrominos controlled by the same player
       // exit the function but don't trigger a game over
       return true;
     }

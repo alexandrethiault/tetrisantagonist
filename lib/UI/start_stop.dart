@@ -6,6 +6,8 @@ import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 
+// The start or stop button widget in the main screen
+
 class StartStop extends StatefulWidget {
   const StartStop({Key? key}) : super(key: key);
 
@@ -19,10 +21,6 @@ class _StartStopState extends State<StartStop> {
     return Container(
       decoration: GameBoxDecoration(),
       child: TextButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
-
-        ),
         child: FittedBox(
           fit: BoxFit.contain,
           child: Text(

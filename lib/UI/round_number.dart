@@ -5,6 +5,8 @@ import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 
+// Widget that displays the current round number
+
 class RoundNumber extends StatefulWidget {
   const RoundNumber({Key? key}) : super(key: key);
 

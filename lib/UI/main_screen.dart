@@ -10,6 +10,8 @@ import 'scores_widget.dart';
 import 'start_stop.dart';
 import '../constants/ui_constants.dart';
 
+// The screen the server will display to everyone during the game
+
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -35,62 +37,60 @@ class _MainScreenState extends State<MainScreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            const Scores(),
-            Expanded(
-              child: Container(
-                child: Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Flexible(
-                          flex: GRID_TO_SIDEBAR_RATIO,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              DEFAULT_BORDER_WIDTH*4,
-                              DEFAULT_BORDER_WIDTH*4,
-                              DEFAULT_BORDER_WIDTH*2,
-                              DEFAULT_BORDER_WIDTH*4
-                            ),
-                            child: GameWidget(key: _key),
+            const Scores(), // top of the screen: display the scores
+            Expanded( // the rest of the screen
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Flexible( // left side of the screen: main game grid
+                        flex: GRID_TO_SIDEBAR_RATIO,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            DEFAULT_BORDER_WIDTH*4,
+                            DEFAULT_BORDER_WIDTH*4,
+                            DEFAULT_BORDER_WIDTH*2,
+                            DEFAULT_BORDER_WIDTH*4
                           ),
-                        ),
-                        Flexible(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              DEFAULT_BORDER_WIDTH*2,
-                              DEFAULT_BORDER_WIDTH*4,
-                              DEFAULT_BORDER_WIDTH*4,
-                              DEFAULT_BORDER_WIDTH*4
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const <Widget>[
-                                NextTetromino(),
-                                SizedBox(height: 30),
-                                EnergyBar(),
-                                SizedBox(height: 30),
-                                RoundNumber(),
-                                SizedBox(height: 30),
-                                StartStop(),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Expanded(
-                      child: SizedBox(
-                        height: 200,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: DevicesListScreen(deviceType: DeviceType.host),
+                          child: GameWidget(key: _key),
                         ),
                       ),
+                      Flexible( // right side of the screen
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            DEFAULT_BORDER_WIDTH*2,
+                            DEFAULT_BORDER_WIDTH*4,
+                            DEFAULT_BORDER_WIDTH*4,
+                            DEFAULT_BORDER_WIDTH*4
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const <Widget>[
+                              NextTetromino(),
+                              SizedBox(height: 30),
+                              EnergyBar(),
+                              SizedBox(height: 30),
+                              RoundNumber(),
+                              SizedBox(height: 30),
+                              StartStop(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Expanded(
+                    child: SizedBox(
+                      height: 200,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DevicesListScreen(deviceType: DeviceType.host),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

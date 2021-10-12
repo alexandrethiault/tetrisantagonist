@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'square.dart';
-//TODO collisions tmtc
+
 const String tetrominoes = """
  X  .    . X  .    .
  X  .XXXX. X  .XXXX.
@@ -46,12 +46,13 @@ X X .X X .X X .X X .
 ....................
 """;
 
+// Tetrominos are made of 4 Square and have 4 possible rotations
 class Tetromino {
   int x = 0; // reference position
   int y = 0;
   int rotationIndex = 0; // between 0 and 3
   List<List<Square>> rotations = <List<Square>>[]; // list of 4 rotations
-  bool _isFrozen = false;
+  bool _isFrozen = false; // player can't rotate it
 
   Tetromino(this.rotations, this.rotationIndex) {
     x = 3;

@@ -6,6 +6,8 @@ import 'package:tetrisserver/DataLayer/tetromino.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 
+// Next tetromino widget, showing the next tetromino to enter the main game grid
+
 class NextTetromino extends StatefulWidget {
   const NextTetromino({Key? key}) : super(key: key);
 
@@ -66,8 +68,9 @@ class _NextTetrominoState extends State<NextTetromino> {
     int minY = nextTetromino.minY;
     int maxY = nextTetromino.maxY;
     Color color;
-    final RenderBox renderBoxTetris = _keyInnerWidget.currentContext!.findRenderObject() as RenderBox;
-    double width = renderBoxTetris.size.width * 0.22;
+    final RenderBox renderBoxInnerWidget =
+      _keyInnerWidget.currentContext!.findRenderObject() as RenderBox;
+    double width = renderBoxInnerWidget.size.width * 0.22;
 
     List<Widget> columns = [];
     for (int y = minY; y <= maxY; ++y) {
@@ -81,12 +84,18 @@ class _NextTetrominoState extends State<NextTetromino> {
           }
         }
 
-        rows.add(Container(width: width, height: width, color: color));
+        if (color == Colors.transparent) {
+          rows.add(Container(width: width, height: width, color: color));
+        } else {
+          rows.add(Container(width: width, height: width,
+                decoration: SquareDecoration(color, nextTetromino.isFrozen)));
+        }
       }
 
-      columns.add(
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: rows),
-      );
+      columns.add(Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: rows
+      ));
     }
 
     return Column(

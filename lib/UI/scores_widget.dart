@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 
 import '../constants/ui_constants.dart';
-// TODO mettre des FittedBox partout partout partout partout et le score sous le "Player"
+
+// The widget that shows all players' scores
+
 class Scores extends StatefulWidget {
   const Scores({Key? key}) : super(key: key);
 
@@ -22,9 +24,9 @@ class _ScoresState extends State<Scores> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          scoreContainer(0), const SizedBox(width: 5),
-          scoreContainer(1), const SizedBox(width: 5),
-          scoreContainer(2), const SizedBox(width: 5),
+          scoreContainer(0), SizedBox(width: MediaQuery.of(context).size.width * 0.04),
+          scoreContainer(1), SizedBox(width: MediaQuery.of(context).size.width * 0.04),
+          scoreContainer(2), SizedBox(width: MediaQuery.of(context).size.width * 0.04),
           scoreContainer(3),
         ],
       ),
@@ -44,21 +46,19 @@ class _ScoresState extends State<Scores> {
             color: isAntagonist ? BORDERS_COLOR: normalColor,
           ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: Text(
-              'Player ${i+1}: ${Provider.of<GameData>(context).scores[i]}',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+      width: MediaQuery.of(context).size.width * 0.20,
+      child: Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: FittedBox(
+          child: Text(
+            'Player ${i+1}\n${Provider.of<GameData>(context).scores[i]}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
