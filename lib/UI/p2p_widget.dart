@@ -265,7 +265,8 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
         gameData.nearbyService.dataReceivedSubscription(callback: (data) {
       print("dataReceivedSubscription: ${jsonEncode(data)}");
       print(Message.fromJson(data).message.toString());
-      gameData.applyCommand(Message.fromJson(data).message.toString());
+      gameData.applyCommand(Message.fromJson(data).deviceId, Message.fromJson(data).message);
+
       showToast(jsonEncode(data),
           context: context,
           axis: Axis.horizontal,

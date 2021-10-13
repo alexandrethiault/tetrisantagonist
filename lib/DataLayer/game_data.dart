@@ -144,7 +144,7 @@ class GameData with ChangeNotifier {
   }
 
   // Don't listen to command coming from wrong player (-1 to bypass check)
-  bool applyCommand(String command, [int playerSendingCommand=-1]) {
+  bool applyCommand(String command, [ playerSendingCommand=-1]) {
     if (!isLaunched) {
       return false;
     }
