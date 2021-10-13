@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ const int COOL_DOWN_INIT = 15;
 class GameData with ChangeNotifier {
 
   late NearbyService nearbyService;
+  HashMap<String, int> deviceIdToPlayerId = HashMap<String, int>();
+  HashMap<int, String> playerIdToDeviceId = HashMap<int, String>();
 
   bool isLaunched = false;
   int roundNumber = 0;
@@ -142,15 +145,40 @@ class GameData with ChangeNotifier {
     notifyListeners();
   }
 
-  // Don't listen to command coming from wrong player (-1 to bypass check)
-  bool applyCommand(String command, [ playerSendingCommand=-1]) {
+  // Don't listen to command coming from wrong player ("" to bypass check)
+  bool applyCommand(String command, [String deviceId=""]) {
+    int playerSendingCommand = -1;
+    if (deviceId != "") {
+      playerSendingCommand = deviceIdToPlayerId[deviceId] as int;
+    }
+
     if (!isLaunched) {
       return false;
     }
 
     if (command.startsWith("Antagonist:")) {
+      if (playerSendingCommand != -1 && playerSendingCommand != antagonist) {
+        return false;
+      }
       double energyNeeded = 0.0;
-      if (command.startsWith("Antagonist:TriggerTetromino")) { // + digit [0..7] + digit [1..3]
+      if (command.startsWith("Antagonist:UpdateNextTetrominos")) {
+        // ex: UpdateNextTetrominos[7,2,1];[...];[...]
+        // first integer = type (0 to 7)
+        // second integer = rotationIndex (0 to 3)
+        // third integer = isFrozen (0 or 1)
+        String strings = command.substring("Antagonist:UpdateNextTetrominos".length);
+        List<String> stringList = strings.split(';');
+        for (int i in [0,1,2]) {
+          String string = stringList[i];
+          List<String> sAttributes = string.substring(1, string.length-1).split(',');
+          List<int> attributes = [];
+          for (String s in sAttributes) {
+            attributes.add(int.parse(s));
+          }
+          nextTetrominos[i] = Tetromino.fromArgList(attributes, nextTetrominos[i]);
+        }
+      } else if (command.startsWith("Antagonist:TriggerTetromino")) { // + digit [0..7] + digit [1..3]
+        // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
         // replace tetromino from nextTetrominoes list.
         int tetrominoIndex = int.parse(command[command.length-2]);
         int nextIndex = int.parse(command[command.length-1])-1;
@@ -183,6 +211,7 @@ class GameData with ChangeNotifier {
                 GRID_HEIGHT, GRID_WIDTH);
           }
       } else if (command.startsWith("Antagonist:Freeze")) { // + digit [1..3]
+        // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
         // The player won't be able to rotate this tetromino
         energyNeeded = 0.5;
         if (energy < energyNeeded) {
@@ -191,6 +220,7 @@ class GameData with ChangeNotifier {
         int nextIndex = int.parse(command[command.length-1])-1;
         nextTetrominos[nextIndex].freeze();
       } else if (command.startsWith("Antagonist:SwitchNext")) { // + digit [1..3] + digit [1..3]
+        // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
         // switch the tetrominos' shapes (not the colors) from the Next list
         energyNeeded = 0.1;
         if (energy < energyNeeded) {
@@ -241,6 +271,9 @@ class GameData with ChangeNotifier {
       notifyListeners();
       return true;
     } else {
+      if (playerSendingCommand != -1 && playerSendingCommand == antagonist) {
+        return false;
+      }
       bool applied = false;
       for (Tetromino curTetromino in curTetrominos) {
         Color playerColor = curTetromino.color;
@@ -327,6 +360,7 @@ class GameData with ChangeNotifier {
       coolDownFall = curTetromino.height;
     }
     nextTetrominos.remove(curTetromino);
+    // just a placeholder, the data from antagonist client will overwrite this
     nextTetrominos.add(Tetromino.random(playerColors[nextPlayer], realDropIndex()));
     _incrementDropIndex();
     _incrementNextPlayer();
