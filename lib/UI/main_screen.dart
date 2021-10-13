@@ -37,7 +37,11 @@ class _MainScreenState extends State<MainScreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            const Scores(), // top of the screen: display the scores
+            // const Scores(), // top of the screen: display the scores
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 10,
+              child: const DevicesListScreen(deviceType: DeviceType.host),
+            ),
             Expanded( // the rest of the screen
               child: Column(
                 children: [
@@ -80,15 +84,6 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ),
                     ],
-                  ),
-                  const Expanded(
-                    child: SizedBox(
-                      height: 200,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: DevicesListScreen(deviceType: DeviceType.host),
-                      ),
-                    ),
                   ),
                 ],
               ),

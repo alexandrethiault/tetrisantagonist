@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:provider/provider.dart';
+import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'package:tetrisserver/constants/ui_constants.dart';
 
 import '../main.dart';
@@ -44,31 +46,47 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-          itemCount: getItemCount(),
-          itemBuilder: (context, index) {
-            final device = widget.deviceType == DeviceType.host
-                ? connectedDevices[index]
-                : devices[index];
-            return Container(
-              margin: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Row(
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+        itemCount: getItemCount(),
+        itemBuilder: (context, index) {
+          final device = connectedDevices[index];
+          bool isAntagonist = (Provider.of<GameData>(context).antagonist == index);
+          return Container(
+            decoration: BoxDecoration(
+              color: playerColors[index],
+              border: Border.all(
+                width: 5.0,
+                color: isAntagonist ? BORDERS_COLOR: playerColors[index],
+              ),
+            ),
+            width : MediaQuery.of(context).size.width * 0.20,
+            margin: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: FittedBox(
+                    fit:BoxFit.contain,
+                    child: Text(
+                      'Player ${index+1}\n${Provider.of<GameData>(context).scores[index]}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.grey,
+                  child: Row(
                     children: [
                       Expanded(
                           child: GestureDetector(
                         onTap: () => _onTabItemListener(device),
                         child: Column(
                           children: [
-                            Text(device.deviceName),
-                            Text(
-                              getStateName(device.state),
-                              style:
-                                  TextStyle(color: getStateColor(device.state)),
-                            ),
+                            Text(device.deviceName, overflow: TextOverflow.clip,),
                           ],
                           crossAxisAlignment: CrossAxisAlignment.start,
                         ),
@@ -78,13 +96,11 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                         onTap: () => _onButtonClicked(device),
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                          padding: const EdgeInsets.all(8.0),
-                          height: 35,
-                          width: 100,
+                          padding: const EdgeInsets.all(5.0),
                           color: getButtonColor(device.state),
                           child: Center(
                             child: Text(
-                              getButtonStateName(device.state),
+                              " x ",
                               style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
@@ -94,18 +110,11 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                       )
                     ],
                   ),
-                  const SizedBox(
-                    height: 8.0,
-                  ),
-                  const Divider(
-                    height: 1,
-                    color: Colors.grey,
-                  )
-                ],
-              ),
-            );
-          }),
-    );
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   String getStateName(SessionState state) {
