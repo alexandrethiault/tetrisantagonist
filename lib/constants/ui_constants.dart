@@ -19,7 +19,7 @@ enum DeviceType { host, player }
 
 enum PlayerRole { player, foe, awaiting}
 
-const List<Color> playerColors = [Colors.grey, Colors.red, Colors.blue, Colors.green, Colors.yellow];
+const List<Color> playerColors = [Colors.red, Colors.blue, Colors.green, Colors.yellow];
 const Color squareBorderColor = Colors.black12;
 const Color squareFrozenColor = Colors.grey;
 const double squareBorderWidth = 3.0;
