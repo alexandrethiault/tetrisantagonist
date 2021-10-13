@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
+import 'package:tetrisserver/constants/ui_constants.dart';
 
 import 'square.dart';
 import 'tetromino.dart';
@@ -21,8 +22,6 @@ class GameData with ChangeNotifier {
   int roundNumber = 0;
 
   List<int> scores = [0, 0, 0, 0];
-  List<Color> playerColors = [
-    Colors.orange, Colors.blue, Colors.green, Colors.yellow];
 
   List<Tetromino> curTetrominos = <Tetromino>[];
   List<Tetromino> nextTetrominos = <Tetromino>[];

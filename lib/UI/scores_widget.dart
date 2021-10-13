@@ -35,7 +35,7 @@ class _ScoresState extends State<Scores> {
 
   Container scoreContainer(int i) {
     bool isAntagonist = (Provider.of<GameData>(context).antagonist == i);
-    Color normalColor = Provider.of<GameData>(context, listen: false).playerColors[i];
+    Color normalColor = playerColors[i];
 
     Color scoreContainerColor = normalColor;
     return Container(
