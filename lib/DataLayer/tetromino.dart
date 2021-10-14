@@ -52,7 +52,9 @@ class Tetromino {
   int y = 0;
   int rotationIndex = 0; // between 0 and 3
   List<List<Square>> rotations = <List<Square>>[]; // list of 4 rotations
-  bool _isFrozen = false; // player can't rotate it
+  int _type = -1;
+  int _dropIndex = 2; // 1 or 2 or 3: spawn on the left/mid/right of the grid
+  int _isFrozen = 0; // player can't rotate it if 1
 
   Tetromino(this.rotations, this.rotationIndex) {
     x = 3;
@@ -66,32 +68,47 @@ class Tetromino {
     rotations = [[],[],[],[]];
   }
 
-  Tetromino.fromType(int type, Color color, [this.rotationIndex=0, int dropIndex=2]) {
+  Tetromino.fromType(this._type, Color color, [this.rotationIndex=0, this._dropIndex=2, this._isFrozen=0]) {
     String string = tetrominoes;
     List<String> lines = string.split('\n');
     rotations = [[],[],[],[]];
     for (int i = 0; i < 4; i++) { // iterate through lines 5*type to 5*type+3
       for (int k in [0,1,2,3]) { // iterate through possible rotations
         for (int j = 0; j < 4; j++) { // iterate through columns 5*k to 5*k+3
-          if (lines[5*type+i][5*k+j] == "X") {
+          if (lines[5*_type+i][5*k+j] == "X") {
             rotations[k].add(Square(i, j, color));
           }
         }
       }
     }
 
-    x = 5*dropIndex-width~/2-minX;
+    x = 5*_dropIndex-width~/2-minX;
     y = 5-maxY;
   }
 
-  Tetromino.random(Color color, [int dropIndex=2]) :
-        this.fromType(Random().nextInt(7), color, Random().nextInt(4), dropIndex);
+  Tetromino.random(Color color, [int dropIndex=2, int frozen=0]) :
+        this.fromType(Random().nextInt(7), color, Random().nextInt(4), dropIndex, frozen);
+
+  // change the shape of the tetromino but keep the color and drop index
+  Tetromino.fromArgList(List<int> attributes, Tetromino other) :
+        this.fromType(attributes[0], other.color, attributes[1], other._dropIndex, attributes[2]);
 
   Tetromino copy() {
     Tetromino copy = Tetromino(rotations, rotationIndex);
     copy.x = x;
     copy.y = y;
+    copy._dropIndex = _dropIndex;
+    copy._isFrozen = _isFrozen;
+    copy._type = _type;
     return copy;
+  }
+
+  String export() {
+    String s = "[";
+    s += _type.toString() + ",";
+    s += rotationIndex.toString() + ",";
+    s += _isFrozen.toString() + "]";
+    return s;
   }
 
   Color get color => rotations[0][0].color;
@@ -150,10 +167,10 @@ class Tetromino {
 
   int get height => maxX - minX + 1;
 
-  bool get isFrozen => _isFrozen;
+  bool get isFrozen => (_isFrozen==1);
 
   void freeze() {
-    _isFrozen = true;
+    _isFrozen = 1;
   }
 
   // Apply command without safe-checking anything
