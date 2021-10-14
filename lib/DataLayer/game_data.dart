@@ -30,7 +30,7 @@ class GameData with ChangeNotifier {
   int coolDownSpeed = 1;
   int coolDownUntilReset = 0;
 
-  int antagonist = 0;
+  int antagonist = 0; // player id of who's the antagonist
   double energy = 0.0;
 
   int nextPlayer = 1;
@@ -39,6 +39,27 @@ class GameData with ChangeNotifier {
   bool gameIsOver = false;
 
   Timer timer = Timer.periodic(DURATION, (timer) => {});
+
+  @override
+  void dispose() {
+    nearbyService.stopBrowsingForPeers();
+    nearbyService.stopAdvertisingPeer();
+    super.dispose();
+  }
+
+  void linkService(NearbyService service) {
+    nearbyService = service;
+  }
+
+  void updatePlayerRoles(List<Device> connectedDevices){
+    // notifies each connected player of its id and role
+  for (int i = 0; i < connectedDevices.length; i++) {
+    Device device = connectedDevices[i];
+    nearbyService.sendMessage(
+    device.deviceId, 'id=${i}');
+    nearbyService.sendMessage(device.deviceId, 'r=${i == antagonist ? PlayerRole.foe :PlayerRole.player}');
+  }
+}
 
   void _incrementNextPlayer() {
     nextPlayer++;

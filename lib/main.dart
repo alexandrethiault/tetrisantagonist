@@ -3,27 +3,27 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' show ChangeNotifierProvider;
 import 'package:tetrisserver/UI/controller_widget.dart';
 
+import 'DataLayer/controller_data.dart';
 import 'DataLayer/game_data.dart';
 import 'UI/main_screen.dart';
-
-GameData gameData = GameData();
 
 void main() => runApp(
   const MyApp(),
 );
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  gameData = GameData();
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(builder: (_) => const Home());
     case 'join':
       return MaterialPageRoute(
-          builder: (_) => PlayerControllerWidget());
+          builder: (_) => ChangeNotifierProvider(
+              create: (context) => ControllerData(),
+              child: const PlayerControllerWidget()));
     case 'host':
       return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
-              create: (context) => gameData,
+              create: (context) => GameData(),
               child: const MainScreen()));
     default:
       return MaterialPageRoute(

@@ -8,10 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:tetrisserver/DataLayer/tetromino.dart';
+import 'package:tetrisserver/UI/next_tetromino.dart';
 import 'package:tetrisserver/constants/ui_constants.dart';
 
+import 'Tetromino.dart';
+
 class PlayerControllerWidget extends StatefulWidget {
-  PlayerControllerWidget({Key? key}) : super(key: key);
+  const PlayerControllerWidget({Key? key}) : super(key: key);
 
   final DeviceType deviceType = DeviceType.player;
 
@@ -29,11 +33,14 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   late StreamSubscription subscription;
   late StreamSubscription receivedDataSubscription;
 
+  List<Tetromino> tetrominos = [];
+
   Color playerColor = Colors.red;
 
   @override
   void initState() {
     super.initState();
+    tetrominos = [Tetromino.random(playerColor), Tetromino.random(playerColor), Tetromino.random(playerColor), Tetromino.random(playerColor)];
     init();
   }
 
@@ -48,6 +55,19 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   Widget foeInterface() {
     return Container(
       color: Colors.black,
+      child: Center(
+        child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: tetrominos.length,
+            itemBuilder: (context, index) {
+              return Container(
+                  height: 100,
+                  width: 100,
+                  child: Center(
+                      child: TetrominoWidget(tetrominos[index], 50)));
+            },
+        ),
+      ),
     );
   }
 
