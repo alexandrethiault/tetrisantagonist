@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:tetrisserver/DataLayer/tetromino.dart';
-import 'package:tetrisserver/UI/next_tetromino.dart';
 import 'package:tetrisserver/constants/ui_constants.dart';
 
 import 'Tetromino.dart';
@@ -40,7 +39,12 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   @override
   void initState() {
     super.initState();
-    tetrominos = [Tetromino.random(playerColor), Tetromino.random(playerColor), Tetromino.random(playerColor), Tetromino.random(playerColor)];
+    tetrominos = [
+      Tetromino.random(playerColor),
+      Tetromino.random(playerColor),
+      Tetromino.random(playerColor),
+      Tetromino.random(playerColor)
+    ];
     init();
   }
 
@@ -54,19 +58,52 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
 
   Widget foeInterface() {
     return Container(
-      color: Colors.black,
-      child: Center(
-        child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: tetrominos.length,
-            itemBuilder: (context, index) {
-              return Container(
-                  height: 100,
-                  width: 100,
-                  child: Center(
-                      child: TetrominoWidget(tetrominos[index], 50)));
-            },
-        ),
+      padding: EdgeInsets.all(8),
+      color: Colors.black54,
+      child: Column(
+        children: [
+          Text(
+            "You are the antagonist !",
+            style: TextStyle(color: Colors.white),
+          ),
+          Container(
+            height: 100,
+            child: Row(
+              children: [
+                ElevatedButton(
+                    onPressed: null,
+                    child: Container(
+                        color: Colors.grey,
+                        child: Icon(Icons.arrow_left))),
+                ElevatedButton(
+                    onPressed: null,
+                    child: Container(
+                        color: Colors.grey,
+                        child: Icon(Icons.lock_outline_rounded))),
+                ElevatedButton(
+                    onPressed: null,
+                    child: Container(
+                        color: Colors.grey,
+                        child: Icon(Icons.arrow_right))),
+              ],
+            ),
+          ),
+          Container(
+            height: 100,
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: tetrominos.length,
+              itemBuilder: (context, index) {
+                return Container(
+                    height: 100,
+                    width: 100,
+                    child:
+                        Center(child: TetrominoWidget(tetrominos[index], 50)));
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -194,7 +231,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
         body: Container(
           color: playerColor,
           child: Stack(alignment: Alignment.topCenter, children: [
-            Center(
+            Positioned(
+              top: 100,
               child: connected
                   ? role == PlayerRole.player
                       ? playerInterface(MediaQuery.of(context).size.width / 6)
@@ -393,7 +431,9 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     ;
     if (command.startsWith("r")) // what role player has
     {
-      setState(() => role = command.substring(2) == "PlayerRole.player" ? PlayerRole.player: PlayerRole.foe);
+      setState(() => role = command.substring(2) == "PlayerRole.player"
+          ? PlayerRole.player
+          : PlayerRole.foe);
     }
   }
 }
