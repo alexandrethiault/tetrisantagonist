@@ -36,7 +36,7 @@ class GameData with ChangeNotifier {
   int antagonist = 0; // player id of who's the antagonist
   double energy = 0.0;
 
-  int nextPlayer = 1;
+  int nextPlayer = 0;
   int nextDropIndex = 2;
 
   bool gameIsOver = false;
@@ -67,6 +67,7 @@ class GameData with ChangeNotifier {
 }
 
   void _incrementNextPlayer() {
+    print(antagonist);
     nextPlayer++;
     if (nextPlayer == 4) nextPlayer = 0;
     if (nextPlayer == antagonist) nextPlayer++;
@@ -120,7 +121,7 @@ class GameData with ChangeNotifier {
     }
     nextDropIndex = 1;
 
-    for (int _ in [0,1,2]) {
+    for (int _ in [0,1]) {
       nextTetrominos.add(Tetromino.random(playerColors[nextPlayer], realDropIndex()));
       _incrementDropIndex();
       _incrementNextPlayer();
@@ -184,22 +185,18 @@ class GameData with ChangeNotifier {
         return false;
       }
       double energyNeeded = 0.0;
-      if (command.startsWith("Antagonist:UpdateNextTetrominos")) {
-        // ex: UpdateNextTetrominos[7,2,1];[...];[...]
+      if (command.startsWith("Antagonist:UpdateNextTetromino")) {
+        // ex: UpdateNextTetromino[7,2,1]
         // first integer = type (0 to 7)
         // second integer = rotationIndex (0 to 3)
         // third integer = isFrozen (0 or 1)
-        String strings = command.substring("Antagonist:UpdateNextTetrominos".length);
-        List<String> stringList = strings.split(';');
-        for (int i in [0,1,2]) {
-          String string = stringList[i];
-          List<String> sAttributes = string.substring(1, string.length-1).split(',');
-          List<int> attributes = [];
-          for (String s in sAttributes) {
-            attributes.add(int.parse(s));
-          }
-          nextTetrominos[i] = Tetromino.fromArgList(attributes, nextTetrominos[i]);
+        String imported = command.substring("Antagonist:UpdateNextTetromino".length);
+        List<String> sAttributes = imported.substring(1, imported.length-1).split(',');
+        List<int> attributes = [];
+        for (String s in sAttributes) {
+          attributes.add(int.parse(s));
         }
+        nextTetrominos[1] = Tetromino.fromArgList(attributes, nextTetrominos[1]);
       } else if (command.startsWith("Antagonist:TriggerTetromino")) { // + digit [0..7] + digit [1..3]
         // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
         // replace tetromino from nextTetrominoes list.
@@ -223,16 +220,6 @@ class GameData with ChangeNotifier {
         coolDownFall = 10000;
         coolDownSpeed = COOL_DOWN_INIT ~/ 2;
         coolDownUntilReset = 3;
-      } else if (command.startsWith("Antagonist:All")) { // ex: AllTurnLeft
-          energyNeeded = 0.6;
-          if (energy < energyNeeded) {
-            return false;
-          }
-          command = command.substring("Antagonist:All".length);
-          for (Tetromino curTetromino in curTetrominos) {
-            curTetromino.tryToApply(command, curTetrominos, groundSquares,
-                GRID_HEIGHT, GRID_WIDTH);
-          }
       } else if (command.startsWith("Antagonist:Freeze")) { // + digit [1..3]
         // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
         // The player won't be able to rotate this tetromino
@@ -387,6 +374,10 @@ class GameData with ChangeNotifier {
     nextTetrominos.add(Tetromino.random(playerColors[nextPlayer], realDropIndex()));
     _incrementDropIndex();
     _incrementNextPlayer();
+
+    String? antagonistId = playerIdToDeviceId[antagonist];
+    if (antagonistId != null)
+      nearbyService.sendMessage(antagonistId, "WhatIsNext?");
 
     // Test game over condition
     return !curTetromino.collidesWithGroundSquares(groundSquares);
