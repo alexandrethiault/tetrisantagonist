@@ -131,9 +131,14 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   Widget playerInterface(double buttonSize) {
-    return Padding(
+    return Container(
+      height: 200,
+      width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.all(8.0),
+      color: Colors.white24,
       child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           InkWell(
             onTap: moveLeft,

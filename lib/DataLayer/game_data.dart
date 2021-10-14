@@ -33,7 +33,7 @@ class GameData with ChangeNotifier {
   int coolDownSpeed = 1;
   int coolDownUntilReset = 0;
 
-  int antagonist = 0; // player id of who's the antagonist
+  int antagonist = 1; // player id of who's the antagonist
   double energy = 0.0;
 
   int nextPlayer = 1;
