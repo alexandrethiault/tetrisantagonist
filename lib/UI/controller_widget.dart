@@ -132,14 +132,15 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
+                    if (index !=4)
                     setState(() {
                       selectedTetromino = index;
                     });
                   },
                   child: Container(
-                      color: index == selectedTetromino
-                          ? Colors.white70
-                          : Colors.white24,
+                    decoration: BoxDecoration(color: index == selectedTetromino
+                        ? Colors.white70
+                        : Colors.white24,border: Border.all(width: index == 4 ? 8 : 0,color: Colors.black54)),
                       height: 100,
                       width: 100,
                       child: Center(
@@ -474,6 +475,10 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     }
   }
 
+  void syncEnergy(int energy){
+    nearbyService.sendMessage(currentHost.deviceId, "Antagonist:updateEnergy"+energy.toString());
+  }
+
   void applyCommand(String command) {
     if (command.startsWith("id")) {
       playerColor = playerColors[int.parse(command[command.length - 1])];
@@ -486,9 +491,12 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
           : PlayerRole.foe);
     }
     if (command.startsWith("WhatIsNext?")) {
-      Tetromino t = tetrominos[tetrominos.length-1];
-      tetrominos.removeAt(tetrominos.length-1);
-      tetrominos.add(Tetromino.random(playerColor));
+      Tetromino t = tetrominos[3];
+      setState(() {
+        tetrominos.removeAt(tetrominos.length-1);
+        tetrominos.insert(0, Tetromino.random(playerColor));
+        if (tetrominos.length < 5) tetrominos.insert(0, Tetromino.random(playerColor));
+      });
       nearbyService.sendMessage(currentHost.deviceId, "Antagonist:UpdateNextTetromino"+t.export());
     }
 
