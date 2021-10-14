@@ -61,6 +61,8 @@ class GameData with ChangeNotifier {
     nearbyService.sendMessage(
     device.deviceId, 'id=${i}');
     nearbyService.sendMessage(device.deviceId, 'r=${i == antagonist ? PlayerRole.foe :PlayerRole.player}');
+    deviceIdToPlayerId[device.deviceId] = i;
+    if (i == 3);
   }
 }
 
