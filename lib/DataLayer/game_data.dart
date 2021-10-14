@@ -54,17 +54,18 @@ class GameData with ChangeNotifier {
     nearbyService = service;
   }
 
-  void updatePlayerRoles(List<Device> connectedDevices){
+  void updatePlayerRoles(List<Device> connectedDevices) {
     // notifies each connected player of its id and role
-  for (int i = 0; i < connectedDevices.length; i++) {
-    Device device = connectedDevices[i];
-    nearbyService.sendMessage(
-    device.deviceId, 'id=${i}');
-    nearbyService.sendMessage(device.deviceId, 'r=${i == antagonist ? PlayerRole.foe :PlayerRole.player}');
-    deviceIdToPlayerId[device.deviceId] = i;
-    if (i == 3);
+    for (int i = 0; i < connectedDevices.length; i++) {
+      Device device = connectedDevices[i];
+      nearbyService.sendMessage(
+      device.deviceId, 'id=${i}');
+      nearbyService.sendMessage(device.deviceId, 'r=${i == antagonist ? PlayerRole.foe :PlayerRole.player}');
+      deviceIdToPlayerId[device.deviceId] = i;
+      playerIdToDeviceId[i] = device.deviceId;
+      if (i == 3);
+    }
   }
-}
 
   void _incrementNextPlayer() {
     print(antagonist);
