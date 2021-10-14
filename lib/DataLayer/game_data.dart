@@ -18,6 +18,7 @@ const int COOL_DOWN_INIT = 15;
 class GameData with ChangeNotifier {
 
   late NearbyService nearbyService;
+  List<Device> _connectedDevices = [];
   HashMap<String, int> deviceIdToPlayerId = HashMap<String, int>();
   HashMap<int, String> playerIdToDeviceId = HashMap<int, String>();
 
@@ -33,7 +34,7 @@ class GameData with ChangeNotifier {
   int coolDownSpeed = 1;
   int coolDownUntilReset = 0;
 
-  int antagonist = 0; // player id of who's the antagonist
+  int antagonist = 1; // player id of who's the antagonist
   double energy = 0.0;
 
   int nextPlayer = 0;
@@ -56,19 +57,21 @@ class GameData with ChangeNotifier {
 
   void updatePlayerRoles(List<Device> connectedDevices) {
     // notifies each connected player of its id and role
-    for (int i = 0; i < connectedDevices.length; i++) {
-      Device device = connectedDevices[i];
-      nearbyService.sendMessage(
-      device.deviceId, 'id=${i}');
+    if (connectedDevices.isEmpty) {
+      _connectedDevices = connectedDevices;
+    }
+    deviceIdToPlayerId.clear();
+    playerIdToDeviceId.clear();
+    for (int i = 0; i < _connectedDevices.length; i++) {
+      Device device = _connectedDevices[i];
+      nearbyService.sendMessage(device.deviceId, 'id=$i');
       nearbyService.sendMessage(device.deviceId, 'r=${i == antagonist ? PlayerRole.foe :PlayerRole.player}');
       deviceIdToPlayerId[device.deviceId] = i;
       playerIdToDeviceId[i] = device.deviceId;
-      if (i == 3);
     }
   }
 
   void _incrementNextPlayer() {
-    print(antagonist);
     nextPlayer++;
     if (nextPlayer == 4) nextPlayer = 0;
     if (nextPlayer == antagonist) nextPlayer++;
@@ -77,9 +80,10 @@ class GameData with ChangeNotifier {
 
   void _incrementAntagonist() {
     antagonist++;
-    if (antagonist == 4) antagonist = 0;
+    if (!playerIdToDeviceId.containsKey(antagonist)) antagonist = 0;
     nextPlayer = antagonist+1;
     if (nextPlayer == 4) nextPlayer = 0;
+    updatePlayerRoles([]);
     notifyListeners();
   }
 
@@ -92,10 +96,10 @@ class GameData with ChangeNotifier {
     return dropIndex;
   }
 
-  // when a tetromino appears, 3 other tetrominos have been generated
+  // when a tetromino appears, 2 other tetrominos have been generated
   // so we need another function that accounts for this lag
   int oldDropIndex() {
-    int dropIndex = (nextDropIndex + 1) % 4;
+    int dropIndex = (nextDropIndex + 2) % 4;
     if (dropIndex == 0) {
       dropIndex = 2;
     }
@@ -198,20 +202,9 @@ class GameData with ChangeNotifier {
           attributes.add(int.parse(s));
         }
         nextTetrominos[1] = Tetromino.fromArgList(attributes, nextTetrominos[1]);
-      } else if (command.startsWith("Antagonist:TriggerTetromino")) { // + digit [0..7] + digit [1..3]
-        // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
-        // replace tetromino from nextTetrominoes list.
-        int tetrominoIndex = int.parse(command[command.length-2]);
-        int nextIndex = int.parse(command[command.length-1])-1;
-        energyNeeded = 0.4;
-        if (energy < energyNeeded) {
-          return false;
-        }
-        if (nextTetrominos.isEmpty) {
-          return false;
-        }
-        nextTetrominos[nextIndex] = Tetromino.fromType(
-            tetrominoIndex, nextTetrominos[0].color, 0);
+      } else if (command.startsWith("Antagonist:UpdateEnergy")) {
+        String imported = command.substring("Antagonist:UpdateEnergy".length);
+        energy = double.parse(imported);
       } else if (command == "Antagonist:SendCombo") {
         // send 3 tetrominos almost at the same time
         energyNeeded = 0.7;
@@ -221,33 +214,6 @@ class GameData with ChangeNotifier {
         coolDownFall = 10000;
         coolDownSpeed = COOL_DOWN_INIT ~/ 2;
         coolDownUntilReset = 3;
-      } else if (command.startsWith("Antagonist:Freeze")) { // + digit [1..3]
-        // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
-        // The player won't be able to rotate this tetromino
-        energyNeeded = 0.5;
-        if (energy < energyNeeded) {
-          return false;
-        }
-        int nextIndex = int.parse(command[command.length-1])-1;
-        nextTetrominos[nextIndex].freeze();
-      } else if (command.startsWith("Antagonist:SwitchNext")) { // + digit [1..3] + digit [1..3]
-        // TODO faire ça directement par l'antagoniste, et appeler Antagonist:UpdateNextTetrominos
-        // switch the tetrominos' shapes (not the colors) from the Next list
-        energyNeeded = 0.1;
-        if (energy < energyNeeded) {
-          return false;
-        }
-        int i1 = int.parse(command[command.length-2])-1;
-        int i2 = int.parse(command[command.length-1])-1;
-        if (nextTetrominos.length < max(i1, i2)) {
-          return false;
-        }
-        Tetromino t = nextTetrominos[i1];
-        nextTetrominos[i1] = nextTetrominos[i2];
-        nextTetrominos[i2] = t;
-        Color c = nextTetrominos[i1].color;
-        nextTetrominos[i1].color = nextTetrominos[i2].color;
-        nextTetrominos[i2].color = c;
       } else if (command == "Antagonist:SwitchFalling") {
         // switch the two lowest falling tetrominos' shapes and colors
         energyNeeded = 0.3;
@@ -334,7 +300,7 @@ class GameData with ChangeNotifier {
       }
     }
     // increment antagonist energy
-    energy = min(1, energy+0.005);
+    energy = min(1, energy+energyIncrement);
     notifyListeners();
   }
 

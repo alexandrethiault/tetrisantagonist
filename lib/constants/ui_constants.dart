@@ -23,3 +23,5 @@ const List<Color> playerColors = [Colors.red, Colors.blue, Colors.green, Colors.
 const Color squareBorderColor = Colors.black12;
 const Color squareFrozenColor = Colors.grey;
 const double squareBorderWidth = 3.0;
+
+const double energyIncrement = 0.005;
