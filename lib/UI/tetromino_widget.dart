@@ -14,7 +14,6 @@ Widget TetrominoWidget(Tetromino tetromino, double width) {
   int minY = tetromino.minY;
   int maxY = tetromino.maxY;
   Color color;
-  double width = 10;
 
   List<Widget> columns = [];
   for (int y = minY; y <= maxY; ++y) {

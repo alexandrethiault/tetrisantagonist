@@ -11,7 +11,7 @@ import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:tetrisserver/DataLayer/tetromino.dart';
 import 'package:tetrisserver/constants/ui_constants.dart';
 
-import 'Tetromino.dart';
+import 'tetromino_widget.dart';
 
 class PlayerControllerWidget extends StatefulWidget {
   const PlayerControllerWidget({Key? key}) : super(key: key);
@@ -26,8 +26,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   List<Device> devices = [];
   List<Device> connectedDevices = [];
   int selectedTetromino = 0;
-  bool connected = false;
-  PlayerRole role = PlayerRole.awaiting;
+  bool connected = true;
+  PlayerRole role = PlayerRole.foe;
   late Device currentHost;
   late NearbyService nearbyService;
   late StreamSubscription subscription;
@@ -81,7 +81,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
             style: TextStyle(color: Colors.white),
           ),
           Container(
-            height: 100,
+            height: 50,
             child: Row(
               children: [
                 ElevatedButton(
@@ -109,9 +109,20 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                     },
                     child: Container(
                         color: Colors.grey, child: Icon(Icons.arrow_right))),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        tetrominos[selectedTetromino] = Tetromino.fromType(
+                            7, playerColor, 0);
+                      });
+                    },
+                    child: Container(
+                        color: Colors.grey, child: TetrominoWidget(Tetromino.fromType(
+                        7, playerColor, 0), 10)),),
               ],
             ),
           ),
+          SizedBox(height: 5,),
           Container(
             height: 100,
             width: MediaQuery.of(context).size.width * 0.8,
@@ -132,7 +143,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                       height: 100,
                       width: 100,
                       child: Center(
-                          child: TetrominoWidget(tetrominos[index], 50))),
+                          child: TetrominoWidget(tetrominos[index], 20))),
                 );
               },
             ),
@@ -480,5 +491,6 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
       tetrominos.add(Tetromino.random(playerColor));
       nearbyService.sendMessage(currentHost.deviceId, "Antagonist:UpdateNextTetromino"+t.export());
     }
+
   }
 }

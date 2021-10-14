@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'package:tetrisserver/DataLayer/tetromino.dart';
 
-import 'Tetromino.dart';
+import 'tetromino_widget.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 
