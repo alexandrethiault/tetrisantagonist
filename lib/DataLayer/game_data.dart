@@ -300,7 +300,7 @@ class GameData with ChangeNotifier {
       }
     }
     // increment antagonist energy
-    energy = min(1, energy+0.005);
+    energy = min(1, energy+energyIncrement);
     notifyListeners();
   }
 
