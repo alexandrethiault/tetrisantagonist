@@ -62,14 +62,13 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void swapTetromino(int index, int index2) {
-    if(index2 >= 0 && index2 <4) {
+    if (index2 >= 0 && index2 < 4) {
       Tetromino temp = tetrominos[index];
       tetrominos[index] = tetrominos[index2];
       tetrominos[index2] = temp;
       selectedTetromino = index2;
     }
   }
-
 
   Widget foeInterface() {
     return Container(
@@ -86,20 +85,30 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
             child: Row(
               children: [
                 ElevatedButton(
-                    onPressed: (){setState((){swapTetromino(selectedTetromino, selectedTetromino-1);});},
+                    onPressed: () {
+                      setState(() {
+                        swapTetromino(selectedTetromino, selectedTetromino - 1);
+                      });
+                    },
                     child: Container(
-                        color: Colors.grey,
-                        child: Icon(Icons.arrow_left))),
+                        color: Colors.grey, child: Icon(Icons.arrow_left))),
                 ElevatedButton(
-                    onPressed: (){setState((){lockTetromino(selectedTetromino);});},
+                    onPressed: () {
+                      setState(() {
+                        lockTetromino(selectedTetromino);
+                      });
+                    },
                     child: Container(
                         color: Colors.grey,
                         child: Icon(Icons.lock_outline_rounded))),
                 ElevatedButton(
-                    onPressed: (){setState((){swapTetromino(selectedTetromino, selectedTetromino+1);});},
+                    onPressed: () {
+                      setState(() {
+                        swapTetromino(selectedTetromino, selectedTetromino + 1);
+                      });
+                    },
                     child: Container(
-                        color: Colors.grey,
-                        child: Icon(Icons.arrow_right))),
+                        color: Colors.grey, child: Icon(Icons.arrow_right))),
               ],
             ),
           ),
@@ -112,15 +121,18 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    setState((){selectedTetromino = index;
+                    setState(() {
+                      selectedTetromino = index;
                     });
-                    },
-                    child : Container(
-                        color: index == selectedTetromino ? Colors.white70: Colors.white24,
-                        height: 100,
-                        width: 100,
-                        child:
-                        Center(child: TetrominoWidget(tetrominos[index], 50))),
+                  },
+                  child: Container(
+                      color: index == selectedTetromino
+                          ? Colors.white70
+                          : Colors.white24,
+                      height: 100,
+                      width: 100,
+                      child: Center(
+                          child: TetrominoWidget(tetrominos[index], 50))),
                 );
               },
             ),
@@ -461,6 +473,12 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
       setState(() => role = command.substring(2) == "PlayerRole.player"
           ? PlayerRole.player
           : PlayerRole.foe);
+    }
+    if (command.startsWith("WhatIsNext?")) {
+      Tetromino t = tetrominos[tetrominos.length-1];
+      tetrominos.removeAt(tetrominos.length-1);
+      tetrominos.add(Tetromino.random(playerColor));
+      nearbyService.sendMessage(currentHost.deviceId, "Antagonist:UpdateNextTetromino"+t.export());
     }
   }
 }
