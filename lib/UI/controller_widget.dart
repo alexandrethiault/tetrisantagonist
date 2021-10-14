@@ -25,6 +25,7 @@ class PlayerControllerWidget extends StatefulWidget {
 class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   List<Device> devices = [];
   List<Device> connectedDevices = [];
+  int selectedTetromino = 0;
   bool connected = false;
   PlayerRole role = PlayerRole.awaiting;
   late Device currentHost;
@@ -56,6 +57,20 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     super.dispose();
   }
 
+  lockTetromino(int id) {
+    tetrominos[id].freeze();
+  }
+
+  void swapTetromino(int index, int index2) {
+    if(index2 >= 0 && index2 <4) {
+      Tetromino temp = tetrominos[index];
+      tetrominos[index] = tetrominos[index2];
+      tetrominos[index2] = temp;
+      selectedTetromino = index2;
+    }
+  }
+
+
   Widget foeInterface() {
     return Container(
       padding: EdgeInsets.all(8),
@@ -71,17 +86,17 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
             child: Row(
               children: [
                 ElevatedButton(
-                    onPressed: null,
+                    onPressed: (){setState((){swapTetromino(selectedTetromino, selectedTetromino-1);});},
                     child: Container(
                         color: Colors.grey,
                         child: Icon(Icons.arrow_left))),
                 ElevatedButton(
-                    onPressed: null,
+                    onPressed: (){setState((){lockTetromino(selectedTetromino);});},
                     child: Container(
                         color: Colors.grey,
                         child: Icon(Icons.lock_outline_rounded))),
                 ElevatedButton(
-                    onPressed: null,
+                    onPressed: (){setState((){swapTetromino(selectedTetromino, selectedTetromino+1);});},
                     child: Container(
                         color: Colors.grey,
                         child: Icon(Icons.arrow_right))),
@@ -95,11 +110,18 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               scrollDirection: Axis.horizontal,
               itemCount: tetrominos.length,
               itemBuilder: (context, index) {
-                return Container(
-                    height: 100,
-                    width: 100,
-                    child:
-                        Center(child: TetrominoWidget(tetrominos[index], 50)));
+                return GestureDetector(
+                  onTap: () {
+                    setState((){selectedTetromino = index;
+                    });
+                    },
+                    child : Container(
+                        color: index == selectedTetromino ? Colors.white70: Colors.white24,
+                        height: 100,
+                        width: 100,
+                        child:
+                        Center(child: TetrominoWidget(tetrominos[index], 50))),
+                );
               },
             ),
           ),
