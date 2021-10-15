@@ -103,10 +103,10 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                           margin: const EdgeInsets.symmetric(horizontal: 8.0),
                           padding: const EdgeInsets.all(5.0),
                           color: getButtonColor(device.state),
-                          child: Center(
+                          child: const Center(
                             child: Text(
                               " x ",
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             ),

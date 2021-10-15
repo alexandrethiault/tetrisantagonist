@@ -57,7 +57,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     super.dispose();
   }
 
-  lockTetromino(int id) {
+  void lockTetromino(int id) {
     tetrominos[id].freeze();
   }
 
@@ -72,15 +72,15 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
 
   Widget foeInterface() {
     return Container(
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       color: Colors.black54,
       child: Column(
         children: [
-          Text(
+          const Text(
             "You are the antagonist !",
             style: TextStyle(color: Colors.white),
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: Row(
               children: [
@@ -91,7 +91,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                       });
                     },
                     child: Container(
-                        color: Colors.grey, child: Icon(Icons.arrow_left))),
+                        color: Colors.grey, child: const Icon(Icons.arrow_left))),
                 ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -100,7 +100,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                     },
                     child: Container(
                         color: Colors.grey,
-                        child: Icon(Icons.lock_outline_rounded))),
+                        child: const Icon(Icons.lock_outline_rounded))),
                 ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -108,7 +108,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                       });
                     },
                     child: Container(
-                        color: Colors.grey, child: Icon(Icons.arrow_right))),
+                        color: Colors.grey, child: const Icon(Icons.arrow_right))),
                 ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -122,8 +122,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               ],
             ),
           ),
-          SizedBox(height: 5,),
-          Container(
+          const SizedBox(height: 5,),
+          SizedBox(
             height: 100,
             width: MediaQuery.of(context).size.width * 0.8,
             child: ListView.builder(
@@ -165,37 +165,37 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
         children: [
           InkWell(
             onTap: moveLeft,
-            child: Container(
+            child: SizedBox(
                 width: buttonSize,
-                child: FittedBox(
+                child: const FittedBox(
                   fit: BoxFit.contain,
                   child: Icon(Icons.arrow_back_ios),
                 )),
           ),
           InkWell(
             onTap: rotateLeft,
-            child: Container(
+            child: SizedBox(
                 width: buttonSize,
-                child: FittedBox(
+                child: const FittedBox(
                   fit: BoxFit.contain,
                   child: Icon(Icons.rotate_left),
                 )),
           ),
-          Spacer(),
+          const Spacer(),
           InkWell(
             onTap: rotateRight,
-            child: Container(
+            child: SizedBox(
                 width: buttonSize,
-                child: FittedBox(
+                child: const FittedBox(
                   fit: BoxFit.contain,
                   child: Icon(Icons.rotate_right),
                 )),
           ),
           InkWell(
             onTap: moveRight,
-            child: Container(
+            child: SizedBox(
                 width: buttonSize,
-                child: FittedBox(
+                child: const FittedBox(
                   fit: BoxFit.contain,
                   child: Icon(Icons.arrow_forward_ios),
                 )),
@@ -215,39 +215,40 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
           itemBuilder: (context, index) {
             final device = devices[index];
             return Container(
-              margin: EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
                   Row(
                     children: [
                       Expanded(
-                          child: GestureDetector(
-                        onTap: () => _onTabItemListener(device),
-                        child: Column(
-                          children: [
-                            Text(device.deviceName),
-                            Text(
-                              getStateName(device.state),
-                              style:
-                                  TextStyle(color: getStateColor(device.state)),
-                            ),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                        ),
-                      )),
+                        child: GestureDetector(
+                          onTap: () => _onTabItemListener(device),
+                          child: Column(
+                            children: [
+                              Text(device.deviceName),
+                              Text(
+                                getStateName(device.state),
+                                style:
+                                    TextStyle(color: getStateColor(device.state)),
+                              ),
+                            ],
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                          ),
+                        )
+                      ),
                       // Request connect
                       GestureDetector(
                         onTap: () => _onButtonClicked(device),
                         child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 8.0),
-                          padding: EdgeInsets.all(8.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.all(8.0),
                           height: 35,
                           width: 100,
                           color: getButtonColor(device.state),
                           child: Center(
                             child: Text(
                               getButtonStateName(device.state),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             ),
@@ -256,10 +257,10 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                       )
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 8.0,
                   ),
-                  Divider(
+                  const Divider(
                     height: 1,
                     color: Colors.grey,
                   )
@@ -287,7 +288,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                   ? role == PlayerRole.player
                       ? playerInterface(MediaQuery.of(context).size.width / 6)
                       : foeInterface()
-                  : Text("Awaiting for role"),
+                  : const Text("Awaiting for role"),
             ),
             Positioned(
               top: 0,
@@ -338,10 +339,11 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
         callback: (isRunning) async {
           if (isRunning) {
             await nearbyService.stopBrowsingForPeers();
-            await Future.delayed(Duration(microseconds: 200));
+            await Future.delayed(const Duration(microseconds: 200));
             await nearbyService.startBrowsingForPeers();
           }
-        });
+        }
+    );
     subscription =
         nearbyService.stateChangedSubscription(callback: (devicesList) {
       devicesList.forEach((element) {
@@ -428,17 +430,17 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
           builder: (BuildContext context) {
             final myController = TextEditingController();
             return AlertDialog(
-              title: Text("Send message"),
+              title: const Text("Send message"),
               content: TextField(controller: myController),
               actions: [
                 TextButton(
-                  child: Text("Cancel"),
+                  child: const Text("Cancel"),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
-                  child: Text("Send"),
+                  child: const Text("Send"),
                   onPressed: () {
                     nearbyService.sendMessage(
                         device.deviceId, myController.text);
@@ -478,7 +480,6 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     if (command.startsWith("id")) {
       playerColor = playerColors[int.parse(command[command.length - 1])];
     }
-    ;
     if (command.startsWith("r")) // what role player has
     {
       setState(() => role = command.substring(2) == "PlayerRole.player"
@@ -486,9 +487,9 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
           : PlayerRole.foe);
     }
     if (command.startsWith("WhatIsNext?")) {
-      Tetromino t = tetrominos[tetrominos.length-1];
-      tetrominos.removeAt(tetrominos.length-1);
+      tetrominos.removeAt(0);
       tetrominos.add(Tetromino.random(playerColor));
+      Tetromino t = tetrominos[0];
       nearbyService.sendMessage(currentHost.deviceId, "Antagonist:UpdateNextTetromino"+t.export());
     }
 

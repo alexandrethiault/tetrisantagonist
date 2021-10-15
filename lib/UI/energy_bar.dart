@@ -18,6 +18,7 @@ class _EnergyBarState extends State<EnergyBar> {
   @override
   Widget build(BuildContext context) {
     double energy = Provider.of<GameData>(context).energy;
+    Color antagonistColor = playerColors[Provider.of<GameData>(context).antagonist];
     return AspectRatio(
       aspectRatio: 0.5,
       child: Container(
@@ -53,11 +54,11 @@ class _EnergyBarState extends State<EnergyBar> {
                         Flexible(
                           flex: (energy*100+5).round(),
                             child: Container(
-                              decoration: const BoxDecoration(
-                                  borderRadius: BorderRadius.all(
+                              decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
                                       Radius.circular(DEFAULT_BORDER_RADIUS-DEFAULT_BORDER_WIDTH)
                                   ),
-                                  color: Colors.yellow
+                                  color: antagonistColor
                               ),
                             )
                         ) // lower part of the energy bar (filled)
