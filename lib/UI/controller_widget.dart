@@ -57,7 +57,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     super.dispose();
   }
 
-  void lockTetromino(int id) {
+  lockTetromino(int id) {
     tetrominos[id].freeze();
   }
 
@@ -132,14 +132,16 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    setState(() {
-                      selectedTetromino = index;
-                    });
+                    if (index !=4) {
+                      setState(() {
+                        selectedTetromino = index;
+                      });
+                    }
                   },
                   child: Container(
-                      color: index == selectedTetromino
-                          ? Colors.white70
-                          : Colors.white24,
+                    decoration: BoxDecoration(color: index == selectedTetromino
+                        ? Colors.white70
+                        : Colors.white24,border: Border.all(width: index == 4 ? 8 : 0,color: Colors.black54)),
                       height: 100,
                       width: 100,
                       child: Center(
@@ -221,21 +223,20 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                   Row(
                     children: [
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () => _onTabItemListener(device),
-                          child: Column(
-                            children: [
-                              Text(device.deviceName),
-                              Text(
-                                getStateName(device.state),
-                                style:
-                                    TextStyle(color: getStateColor(device.state)),
-                              ),
-                            ],
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                          ),
-                        )
-                      ),
+                          child: GestureDetector(
+                        onTap: () => _onTabItemListener(device),
+                        child: Column(
+                          children: [
+                            Text(device.deviceName),
+                            Text(
+                              getStateName(device.state),
+                              style:
+                                  TextStyle(color: getStateColor(device.state)),
+                            ),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      )),
                       // Request connect
                       GestureDetector(
                         onTap: () => _onButtonClicked(device),
@@ -342,8 +343,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
             await Future.delayed(const Duration(microseconds: 200));
             await nearbyService.startBrowsingForPeers();
           }
-        }
-    );
+        });
     subscription =
         nearbyService.stateChangedSubscription(callback: (devicesList) {
       devicesList.forEach((element) {
@@ -476,6 +476,10 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     }
   }
 
+  void syncEnergy(int energy) {
+    nearbyService.sendMessage(currentHost.deviceId, "Antagonist:updateEnergy"+energy.toString());
+  }
+
   void applyCommand(String command) {
     if (command.startsWith("id")) {
       playerColor = playerColors[int.parse(command[command.length - 1])];
@@ -487,9 +491,12 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
           : PlayerRole.foe);
     }
     if (command.startsWith("WhatIsNext?")) {
-      tetrominos.removeAt(0);
-      tetrominos.add(Tetromino.random(playerColor));
-      Tetromino t = tetrominos[0];
+      Tetromino t = tetrominos[3];
+      setState(() {
+        tetrominos.removeAt(tetrominos.length-1);
+        tetrominos.insert(0, Tetromino.random(playerColor));
+        if (tetrominos.length < 5) tetrominos.insert(0, Tetromino.random(playerColor));
+      });
       nearbyService.sendMessage(currentHost.deviceId, "Antagonist:UpdateNextTetromino"+t.export());
     }
 
