@@ -26,8 +26,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   List<Device> devices = [];
   List<Device> connectedDevices = [];
   int selectedTetromino = 0;
-  bool connected = true;
-  PlayerRole role = PlayerRole.foe;
+  bool connected = false;
+  PlayerRole role = PlayerRole.awaiting;
   late Device currentHost;
   late NearbyService nearbyService;
   late StreamSubscription subscription;
