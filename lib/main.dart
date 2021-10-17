@@ -57,51 +57,89 @@ class Home extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: InkWell(
-              onTap: () {
-                Navigator.pushNamed(context, 'join');
-              },
-              child: Container(
-                color: Colors.green,
-                child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          'JOIN',
-                          style: TextStyle(color: Colors.white, fontSize: 40),
-                        ),
-                        Icon(Icons.videogame_asset, color: Colors.white,)
-                      ],
-                    )),
+      backgroundColor: Colors.purpleAccent,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          color: Colors.black54,
+          child: Column(
+            children: [
+              Expanded(
+                child: Image(image: AssetImage('assets/images/title.png'),),
               ),
-            ),
-          ),
-          Expanded(
-            child: InkWell(
-              onTap: () {
-                Navigator.pushNamed(context, 'host');
-              },
-              child: Container(
-                color: Colors.orange,
+              Expanded(
                 child: Center(
+                  child: Container(
+                    height: MediaQuery.of(context).size.width*0.7,
+                    width: MediaQuery.of(context).size.height*0.4,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          'HOST',
-                          style: TextStyle(color: Colors.white, fontSize: 40),
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(context, 'join');
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                border: Border.all(
+                                  color: Colors.white24,
+                                  width: 8,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Text(
+                                        'JOIN',
+                                        style: TextStyle(color: Colors.white, fontSize: 40),
+                                      ),
+                                      Icon(Icons.videogame_asset, color: Colors.white,)
+                                    ],
+                                  )),
+                            ),
+                          ),
                         ),
-                        Icon(Icons.connected_tv, color: Colors.white,)
+                        SizedBox(height: 5,),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(context, 'host');
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.orange,
+                                border: Border.all(
+                                  color: Colors.white24,
+                                  width: 8,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Text(
+                                        'HOST',
+                                        style: TextStyle(color: Colors.white, fontSize: 40),
+                                      ),
+                                      Icon(Icons.connected_tv, color: Colors.white,)
+                                    ],
+                                  )),
+                            ),
+                          ),
+                        ),
                       ],
-                    )),
+                    ),
+                  ),
+                ),
               ),
-            ),
+
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
