@@ -21,6 +21,7 @@ class GameData with ChangeNotifier {
   List<Device> _connectedDevices = [];
   HashMap<String, int> deviceIdToPlayerId = HashMap<String, int>();
   HashMap<int, String> playerIdToDeviceId = HashMap<int, String>();
+  int maxPlayerId = 0;
 
   bool isLaunched = false;
   int roundNumber = 0;
@@ -36,6 +37,7 @@ class GameData with ChangeNotifier {
 
   int antagonist = 1; // player id of who's the antagonist
   double energy = 0.0;
+  int antagonistLives = 0;
 
   int nextPlayer = 0;
   int nextDropIndex = 2;
@@ -57,32 +59,35 @@ class GameData with ChangeNotifier {
 
   void updatePlayerRoles(List<Device> connectedDevices) {
     // notifies each connected player of its id and role
-    if (connectedDevices.isEmpty) {
+    if (connectedDevices.isNotEmpty) {
       _connectedDevices = connectedDevices;
     }
     deviceIdToPlayerId.clear();
     playerIdToDeviceId.clear();
+    maxPlayerId = 0;
     for (int i = 0; i < _connectedDevices.length; i++) {
       Device device = _connectedDevices[i];
       nearbyService.sendMessage(device.deviceId, 'id=$i');
-      nearbyService.sendMessage(device.deviceId, 'r=${i == antagonist ? PlayerRole.foe :PlayerRole.player}');
+      PlayerRole role = (i == antagonist) ? PlayerRole.foe :PlayerRole.player;
+      nearbyService.sendMessage(device.deviceId, 'r=$role');
       deviceIdToPlayerId[device.deviceId] = i;
       playerIdToDeviceId[i] = device.deviceId;
+      maxPlayerId = max(maxPlayerId, i);
     }
   }
 
   void _incrementNextPlayer() {
     nextPlayer++;
-    if (nextPlayer == 4) nextPlayer = 0;
+    if (nextPlayer > maxPlayerId) nextPlayer = 0;
     if (nextPlayer == antagonist) nextPlayer++;
-    if (nextPlayer == 4) nextPlayer = 0;
+    if (nextPlayer > maxPlayerId) nextPlayer = 0;
   }
 
   void _incrementAntagonist() {
     antagonist++;
-    if (!playerIdToDeviceId.containsKey(antagonist)) antagonist = 0;
+    if (antagonist > maxPlayerId) antagonist = 0;
     nextPlayer = antagonist+1;
-    if (nextPlayer == 4) nextPlayer = 0;
+    if (nextPlayer > maxPlayerId) nextPlayer = 0;
     updatePlayerRoles([]);
     notifyListeners();
   }
@@ -121,9 +126,6 @@ class GameData with ChangeNotifier {
   void startGame(double screenWidth) {
     isLaunched = true;
     roundNumber++;
-    for (var i in [0,1,2,3]) {
-      scores[i] = 0;
-    }
     nextDropIndex = 1;
 
     for (int _ in [0,1]) {
@@ -138,14 +140,15 @@ class GameData with ChangeNotifier {
 
     groundSquares = <Square>[];
 
-    energy = 0.9;
+    energy = 0.5;
+    antagonistLives = 5;
 
     timer = Timer.periodic(DURATION, onPlay);
 
     notifyListeners();
   }
 
-  void triggerGameOver() {
+  void triggerGameOver(bool antagonistWon) {
     gameIsOver = true;
 
     _decrementDropIndex();
@@ -154,8 +157,12 @@ class GameData with ChangeNotifier {
     nextTetrominos.clear();
 
     timer.cancel();
-    timer = Timer.periodic(DURATION, onGameOver);
-
+    if (antagonistWon) {
+      _incrementScoresAntagonistWon();
+      timer = Timer.periodic(DURATION, onGameOver);
+    } else {
+      _incrementScoresAntagonistLost();
+    }
     notifyListeners();
   }
 
@@ -191,10 +198,7 @@ class GameData with ChangeNotifier {
       }
       double energyNeeded = 0.0;
       if (command.startsWith("Antagonist:UpdateNextTetromino")) {
-        // ex: UpdateNextTetromino[7,2,1]
-        // first integer = type (0 to 7)
-        // second integer = rotationIndex (0 to 3)
-        // third integer = isFrozen (0 or 1)
+        // ex: UpdateNextTetromino[7,2,1] -> type (0 to 7), rotationIndex (0 to 3), isFrozen (0 or 1)
         String imported = command.substring("Antagonist:UpdateNextTetromino".length);
         List<String> sAttributes = imported.substring(1, imported.length-1).split(',');
         List<int> attributes = [];
@@ -274,14 +278,18 @@ class GameData with ChangeNotifier {
     // Change tetrominos which reached the ground into ground squares
     for (int iCur = curTetrominos.length-1; iCur >= 0; iCur--) {
       Tetromino curTetromino = curTetrominos[iCur];
+      int? playerId = colorToPlayerId[curTetromino.color];
       if (!curTetromino.tryToApply("Down", curTetrominos, groundSquares,
           GRID_HEIGHT, GRID_WIDTH)) {
         if (!curTetromino.addSquaresTo(groundSquares)) {
           // Not fully inside the screen when reached ground squares: game over
-          return triggerGameOver();
+          return triggerGameOver(true);
         }
-        _deleteFullLines();
+        int linesSkipped = _deleteFullLines();
+        _incrementScoresLineDeleted((playerId!=null) ? playerId : -1, linesSkipped);
         _removeFromCurTetrominos(curTetromino);
+      } else {
+        _incrementScoresTetrominoLanded(curTetromino, (playerId!=null) ? playerId : -1);
       }
     }
     // if cool down variables allow it, send the next tetromino to the board
@@ -289,7 +297,7 @@ class GameData with ChangeNotifier {
     if (curTetrominos.isEmpty || coolDownFall <= 0) {
       if (!_sendNextTetromino()) {
         // Can't send next tetromino: game over
-        return triggerGameOver();
+        return triggerGameOver(true);
       }
       coolDownFall = COOL_DOWN_INIT;
       if (coolDownSpeed != 1) {
@@ -301,6 +309,9 @@ class GameData with ChangeNotifier {
     }
     // increment antagonist energy
     energy = min(1, energy+energyIncrement);
+    if (antagonistLives <= 0) {
+      triggerGameOver(false);
+    }
     notifyListeners();
   }
 
@@ -343,8 +354,9 @@ class GameData with ChangeNotifier {
     _incrementNextPlayer();
 
     String? antagonistId = playerIdToDeviceId[antagonist];
-    if (antagonistId != null)
+    if (antagonistId != null) {
       nearbyService.sendMessage(antagonistId, "WhatIsNext?");
+    }
 
     // Test game over condition
     return !curTetromino.collidesWithGroundSquares(groundSquares);
@@ -352,7 +364,7 @@ class GameData with ChangeNotifier {
 
   // When a line is completed, delete its ground squares
   // and move one level down all squares above
-  void _deleteFullLines() {
+  int _deleteFullLines() {
     List<bool> tab = List.filled(GRID_HEIGHT*GRID_WIDTH, false);
     List<Color> color = List.filled(GRID_HEIGHT*GRID_WIDTH, Colors.grey);
     List<int> count = List.filled(GRID_HEIGHT, 0);
@@ -371,7 +383,7 @@ class GameData with ChangeNotifier {
       }
     }
     if (nothingToDo) {
-      return;
+      return 0;
     }
 
     groundSquares.clear();
@@ -385,6 +397,50 @@ class GameData with ChangeNotifier {
           if (tab[idx]) {
             groundSquares.add(Square(column, line+linesSkipped, color[idx]));
           }
+        }
+      }
+    }
+    return linesSkipped;
+  }
+
+  void _incrementScoresAntagonistWon() {
+    scores[antagonist] += 150;
+  }
+
+  void _incrementScoresAntagonistLost() {
+    for (int i in playerIdToDeviceId.keys) {
+      if (i != antagonist) {
+        scores[i] += 50;
+      }
+    }
+  }
+
+  void _incrementScoresLineDeleted(int playerId, int linesSkipped) {
+    if (playerId == -1) return;
+    for (int i in playerIdToDeviceId.keys) {
+      if (i != antagonist) {
+        scores[i] += 10 * linesSkipped * (linesSkipped+1) ~/ 2; // 10, 30, 60, 100...
+      }
+    }
+    scores[playerId] += 20 * linesSkipped * (linesSkipped+1) ~/ 2;
+    antagonistLives--;
+  }
+
+  void _incrementScoresTetrominoLanded(Tetromino curTetromino, int playerId) {
+    if (playerId == -1) return;
+    for (Square groundSquare in groundSquares) {
+      for (Square square in curTetromino.squares()) {
+        if (square.y == groundSquare.y && (square.x == 0 || square.x-1 == groundSquare.x)) {
+          scores[playerId] += 1;
+        }
+        if (square.y == groundSquare.y && (square.x == GRID_WIDTH-1 || square.x+1 == groundSquare.x)) {
+          scores[playerId] += 1;
+        }
+        if (square.x == groundSquare.x && (square.y == GRID_HEIGHT-1 || square.y+1 == groundSquare.y)) {
+          scores[playerId] += 1;
+        }
+        if (square.x == groundSquare.x && (square.y-1 == groundSquare.y)) {
+          scores[playerId] += 2;
         }
       }
     }
