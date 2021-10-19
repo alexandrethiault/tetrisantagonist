@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
@@ -17,6 +19,7 @@ class RoundNumber extends StatefulWidget {
 class _RoundNumberState extends State<RoundNumber> {
   @override
   Widget build(BuildContext context) {
+    int lives = max(0, Provider.of<GameData>(context).antagonistLives);
     return Container(
       decoration: GameBoxDecoration(),
       child: Column(
@@ -40,7 +43,7 @@ class _RoundNumberState extends State<RoundNumber> {
                 decoration: GameBoxDecoration(DEFAULT_BORDER_RADIUS-2*DEFAULT_BORDER_WIDTH),
                 child: Center(
                   child: Text(
-                    Provider.of<GameData>(context).antagonistLives.toString(),
+                    lives.toString(),
                     style: const TextStyle(
                         color: BORDERS_COLOR,
                         fontWeight: FontWeight.bold,

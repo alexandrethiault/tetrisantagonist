@@ -140,7 +140,8 @@ class GameData with ChangeNotifier {
     groundSquares = <Square>[];
 
     energy = 0.5;
-    antagonistLives = 2;
+    antagonistLives = 4;
+    lineBeingDeletedStep = 0;
 
     timer = Timer.periodic(DURATION, onPlay);
 
@@ -150,8 +151,9 @@ class GameData with ChangeNotifier {
   void triggerGameOver(bool antagonistWon) {
     gameIsOver = true;
 
-    _decrementDropIndex();
-
+    if (antagonistWon) {
+      _decrementDropIndex();
+    }
     curTetrominos.clear();
     nextTetrominos.clear();
 
@@ -339,18 +341,18 @@ class GameData with ChangeNotifier {
 
   void onGameWon(Timer timer) {
     // Remove all ground squares one by one and then call endGame
-    int maxidx = -1;
+    int minidx = 1000000;
     for (Square square in groundSquares) {
-      maxidx = max(maxidx, square.y*GRID_WIDTH+square.x);
+      minidx = min(minidx, square.y*GRID_WIDTH+square.x);
     }
     Square toRemove = Square(0,0);
     for (Square square in groundSquares) {
-      if (maxidx == square.y*GRID_WIDTH+square.x) {
+      if (minidx == square.y*GRID_WIDTH+square.x) {
         toRemove = square;
         break;
       }
     }
-    if (maxidx != -1) {
+    if (minidx != 1000000) {
       groundSquares.remove(toRemove);
     } else {
       endGame();

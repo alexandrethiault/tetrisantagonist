@@ -110,7 +110,7 @@ class GameWidgetState extends State<GameWidget> {
     if (step > 0) {
       stackChildren.add(Positioned(
           left: laserLeftConstraint,
-          top: width * (GRID_HEIGHT - 16),
+          top: width * (GRID_HEIGHT - 18),
           child: SizedBox(
             height: width * 16,
             width: width * 8,

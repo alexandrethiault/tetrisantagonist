@@ -5,8 +5,7 @@ import 'energy_bar.dart';
 import 'game_widget.dart';
 import 'next_tetromino.dart';
 import 'p2p_widget.dart';
-import 'round_number.dart';
-import 'scores_widget.dart';
+import 'lives_widget.dart';
 import 'start_stop.dart';
 import '../constants/ui_constants.dart';
 
