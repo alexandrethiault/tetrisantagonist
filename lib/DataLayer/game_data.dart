@@ -9,8 +9,8 @@ import 'package:tetrisserver/constants/ui_constants.dart';
 import 'square.dart';
 import 'tetromino.dart';
 
-const int GRID_WIDTH = 20;
-const int GRID_HEIGHT = 32;
+const int GRID_WIDTH = 15;
+const int GRID_HEIGHT = 24;
 const Duration DURATION = Duration(milliseconds: 250);
 const int COOL_DOWN_INIT = 15;
 
@@ -68,7 +68,7 @@ class GameData with ChangeNotifier {
     for (int i = 0; i < _connectedDevices.length; i++) {
       Device device = _connectedDevices[i];
       nearbyService.sendMessage(device.deviceId, 'id=$i');
-      PlayerRole role = (i == antagonist) ? PlayerRole.foe :PlayerRole.player;
+      PlayerRole role = (i == antagonist) ? PlayerRole.foe : PlayerRole.player;
       nearbyService.sendMessage(device.deviceId, 'r=$role');
       deviceIdToPlayerId[device.deviceId] = i;
       playerIdToDeviceId[i] = device.deviceId;
@@ -141,7 +141,7 @@ class GameData with ChangeNotifier {
     groundSquares = <Square>[];
 
     energy = 0.5;
-    antagonistLives = 5;
+    antagonistLives = 1;
 
     timer = Timer.periodic(DURATION, onPlay);
 
@@ -159,9 +159,10 @@ class GameData with ChangeNotifier {
     timer.cancel();
     if (antagonistWon) {
       _incrementScoresAntagonistWon();
-      timer = Timer.periodic(DURATION, onGameOver);
+      timer = Timer.periodic(DURATION, onGameLost);
     } else {
       _incrementScoresAntagonistLost();
+      timer = Timer.periodic(DURATION~/4, onGameWon);
     }
     notifyListeners();
   }
@@ -278,7 +279,8 @@ class GameData with ChangeNotifier {
     // Change tetrominos which reached the ground into ground squares
     for (int iCur = curTetrominos.length-1; iCur >= 0; iCur--) {
       Tetromino curTetromino = curTetrominos[iCur];
-      int? playerId = colorToPlayerId[curTetromino.color];
+      int? playerId = colorToPlayerId[curTetromino.color.toString()];
+      print("[game_data.dart/onPlay] curTetromino $playerId");
       if (!curTetromino.tryToApply("Down", curTetrominos, groundSquares,
           GRID_HEIGHT, GRID_WIDTH)) {
         if (!curTetromino.addSquaresTo(groundSquares)) {
@@ -309,13 +311,15 @@ class GameData with ChangeNotifier {
     }
     // increment antagonist energy
     energy = min(1, energy+energyIncrement);
+    print("[game_data.dart/onPlay] lives $antagonistLives");
+    print("[game_data.dart/onPlay] score $scores");
     if (antagonistLives <= 0) {
       triggerGameOver(false);
     }
     notifyListeners();
   }
 
-  void onGameOver(Timer timer) {
+  void onGameLost(Timer timer) {
     // Create a lightning effect by making squares switch between yellow and grey
     Color curColor = groundSquares[0].color;
     if (curColor != Colors.grey) {
@@ -326,6 +330,28 @@ class GameData with ChangeNotifier {
       for (Square square in groundSquares) {
         square.color = Colors.yellow;
       }
+    }
+    notifyListeners();
+  }
+
+  void onGameWon(Timer timer) {
+    // Remove all ground squares one by one and then call endGame
+    int maxidx = -1;
+    for (Square square in groundSquares) {
+      maxidx = max(maxidx, square.y*GRID_WIDTH+square.x);
+    }
+    Square toRemove = Square(0,0);
+    for (Square square in groundSquares) {
+      if (maxidx == square.y*GRID_WIDTH+square.x) {
+        toRemove = square;
+        break;
+      }
+    }
+    if (maxidx != -1) {
+      groundSquares.remove(toRemove);
+    } else {
+      endGame();
+      return;
     }
     notifyListeners();
   }
@@ -408,7 +434,7 @@ class GameData with ChangeNotifier {
   }
 
   void _incrementScoresAntagonistLost() {
-    for (int i in playerIdToDeviceId.keys) {
+    for (int i = 0; i <= maxPlayerId; i++) {
       if (i != antagonist) {
         scores[i] += 50;
       }
@@ -416,20 +442,20 @@ class GameData with ChangeNotifier {
   }
 
   void _incrementScoresLineDeleted(int playerId, int linesSkipped) {
-    if (playerId == -1) return;
-    for (int i in playerIdToDeviceId.keys) {
+    antagonistLives -= linesSkipped;
+    for (int i = 0; i <= maxPlayerId; i++) {
       if (i != antagonist) {
         scores[i] += 10 * linesSkipped * (linesSkipped+1) ~/ 2; // 10, 30, 60, 100...
       }
     }
+    if (playerId == -1) return;
     scores[playerId] += 20 * linesSkipped * (linesSkipped+1) ~/ 2;
-    antagonistLives--;
   }
 
   void _incrementScoresTetrominoLanded(Tetromino curTetromino, int playerId) {
     if (playerId == -1) return;
     for (Square groundSquare in groundSquares) {
-      for (Square square in curTetromino.squares()) {
+      for (Square square in curTetromino.squares) {
         if (square.y == groundSquare.y && (square.x == 0 || square.x-1 == groundSquare.x)) {
           scores[playerId] += 1;
         }
