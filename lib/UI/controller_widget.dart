@@ -34,6 +34,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   late StreamSubscription subscription;
   late StreamSubscription receivedDataSubscription;
 
+  bool hasStarted = false;
+
   double energy = 0;
   Timer timer = Timer.periodic(DURATION, (timer) => {});
 
@@ -56,6 +58,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void incrementEnergy(Timer timer) {
+    if (hasStarted)
     setState(() {
       energy = min(1, energy + energyIncrement);
     });
@@ -691,6 +694,10 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
           : PlayerRole.foe);
     }
     if (command.startsWith("WhatIsNext?")) {
+      if (!hasStarted) {
+        hasStarted = true;
+        energy = 0.5;
+      }
       Tetromino t = tetrominos[3];
       setState(() {
         tetrominos.insert(
