@@ -82,7 +82,7 @@ class Tetromino {
       }
     }
 
-    x = 5*_dropIndex-width~/2-minX;
+    x = (15*_dropIndex)~/4-width~/2-minX;
     y = 5-maxY;
   }
 
