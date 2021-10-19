@@ -21,9 +21,9 @@ BoxDecoration EnergyBarDecoration([double radius=DEFAULT_BORDER_RADIUS]) => BoxD
   borderRadius: BorderRadius.all(Radius.circular(radius)),
 );
 
-BoxDecoration SquareDecoration(Color squareColor, [bool frozen=false]) => BoxDecoration(
+BoxDecoration SquareDecoration(Color squareColor, [bool frozen=false, bool isBomb=false]) => BoxDecoration(
   border: Border.all(
-    color: (frozen) ? squareFrozenColor : squareBorderColor,
+    color: (isBomb) ? squareBombColor : ((frozen) ? squareFrozenColor : squareBorderColor),
     width: squareBorderWidth,
   ),
   color: squareColor

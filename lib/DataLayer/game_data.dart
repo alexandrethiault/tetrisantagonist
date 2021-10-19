@@ -9,11 +9,6 @@ import 'package:tetrisserver/constants/ui_constants.dart';
 import 'square.dart';
 import 'tetromino.dart';
 
-const int GRID_WIDTH = 15;
-const int GRID_HEIGHT = 24;
-const Duration DURATION = Duration(milliseconds: 300);
-const int COOL_DOWN_INIT = 15;
-
 // data that can't stay inside GameState and must be exposed to other widgets
 class GameData with ChangeNotifier {
 
@@ -38,6 +33,7 @@ class GameData with ChangeNotifier {
   int antagonist = 1; // player id of who's the antagonist
   double energy = 0.0;
   int antagonistLives = 0;
+  int lineBeingDeletedStep = 0;
 
   int nextPlayer = 0;
   int nextDropIndex = 2;
@@ -278,17 +274,22 @@ class GameData with ChangeNotifier {
   void onPlay(Timer timer) {
     // Change tetrominos which reached the ground into ground squares
     _deleteFullLines();
+    lineBeingDeletedStep = max(lineBeingDeletedStep-1, 0);
     for (int iCur = curTetrominos.length-1; iCur >= 0; iCur--) {
       Tetromino curTetromino = curTetrominos[iCur];
       int? playerId = colorToPlayerId[curTetromino.color.toString()];
-      print("[game_data.dart/onPlay] curTetromino $playerId");
       if (!curTetromino.tryToApply("Down", curTetrominos, groundSquares,
           GRID_HEIGHT, GRID_WIDTH)) {
-        if (!curTetromino.addSquaresTo(groundSquares)) {
+        if (curTetromino.isBomb) {
+          detonateBomb(curTetromino);
+        } else if (!curTetromino.addSquaresTo(groundSquares)) {
           // Not fully inside the screen when reached ground squares: game over
           return triggerGameOver(true);
         }
         int linesSkipped = _detectFullLines();
+        if (linesSkipped > 0) {
+          lineBeingDeletedStep = 2;
+        }
         _incrementScoresLineDeleted((playerId!=null) ? playerId : -1, linesSkipped);
         _removeFromCurTetrominos(curTetromino);
       } else {
@@ -312,8 +313,6 @@ class GameData with ChangeNotifier {
     }
     // increment antagonist energy
     energy = min(1, energy+energyIncrement);
-    print("[game_data.dart/onPlay] lives $antagonistLives");
-    print("[game_data.dart/onPlay] score $scores");
     if (antagonistLives <= 0) {
       triggerGameOver(false);
     }
@@ -488,6 +487,24 @@ class GameData with ChangeNotifier {
           scores[playerId] += 2;
         }
       }
+    }
+  }
+
+  void detonateBomb(Tetromino curTetromino) {
+    List<Square> toRemove = [];
+    int x = curTetromino.x;
+    int y = curTetromino.y;
+
+    for (Square square in groundSquares) {
+      int sx = square.x;
+      int sy = square.y;
+      if ((sx-x)*(sx-x) + (sy-y)*(sy-y) <= 5) {
+        toRemove.add(square);
+      }
+    }
+
+    for (Square square in toRemove) {
+      groundSquares.remove(square);
     }
   }
 

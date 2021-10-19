@@ -81,16 +81,16 @@ class GameWidgetState extends State<GameWidget> {
             child: Container(
               width: width - 1,
               height: width - 1,
-              decoration: SquareDecoration(square.color, curTetromino.isFrozen),
+              decoration: SquareDecoration(square.color, curTetromino.isFrozen, curTetromino.isBomb),
             )
           )
         );
       }
     }
 
-    double antagonistLeftConstraint = width * GRID_WIDTH / 4;
     int oldIndex = Provider.of<GameData>(context).oldDropIndex();
-    antagonistLeftConstraint = width * GRID_WIDTH / 4 * oldIndex - 5 * width;
+    double antagonistLeftConstraint = width * GRID_WIDTH / 4 * oldIndex - 5 * width;
+    double laserLeftConstraint = width * GRID_WIDTH / 4 * oldIndex - 4 * width;
 
     List<Widget> stackChildren = [
       ...squareChildren,
@@ -105,16 +105,25 @@ class GameWidgetState extends State<GameWidget> {
         ),
       )
     ];
-/*
-    if (groundSquares.length == 16) {
-      stackChildren.add(Flame.util.animationAsWidget(
-          Position(100, 43),
-          animation.Animation.sequenced('laser.png', 6,
-              textureWidth: renderBoxTetris.size.width*0+50, textureHeight: width*0+100,
-              loop: false, stepTime: 0.1)
+
+    int step = Provider.of<GameData>(context).lineBeingDeletedStep;
+    if (step > 0) {
+      stackChildren.add(Positioned(
+          left: laserLeftConstraint,
+          top: width * (GRID_HEIGHT - 16),
+          child: SizedBox(
+            height: width * 16,
+            width: width * 8,
+            child: Flame.util.animationAsWidget(
+              Position(width * 8, width * 16),
+              animation.Animation.sequenced('laser.png', 6,
+                  textureWidth: 50, textureHeight: 100,
+                  textureX: (step-1) * 150,
+                  loop: false, stepTime: 0.1)
+          ))
       ));
     }
-*/
+
     return Stack(children: stackChildren);
   }
 }
