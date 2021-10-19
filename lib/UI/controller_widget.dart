@@ -296,7 +296,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     );
   }
 
-  Widget controllerButton(double buttonSize, IconData icon) {
+  Widget controllerButton(double buttonSize, IconData icon, Function(TapDownDetails) func) {
     return Container(
       height: buttonSize,
       width: buttonSize,
@@ -305,7 +305,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
         borderRadius: BorderRadius.circular(buttonSize / 3),
       ),
       child: GestureDetector(
-        onTapDown: moveLeft,
+        onTapDown: func,
         child: SizedBox(
             width: buttonSize / 2,
             height: buttonSize / 2,
@@ -344,17 +344,17 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                controllerButton(buttonSize * 1.2, Icons.arrow_back),
+                controllerButton(buttonSize * 1.2, Icons.arrow_back, moveLeft),
                 SizedBox(
                   width: 5,
                 ),
-                controllerButton(buttonSize, Icons.rotate_left),
+                controllerButton(buttonSize, Icons.rotate_left, rotateRight),
                 Spacer(),
-                controllerButton(buttonSize, Icons.rotate_right),
+                controllerButton(buttonSize, Icons.rotate_right, rotateLeft),
                 SizedBox(
                   width: 5,
                 ),
-                controllerButton(buttonSize * 1.2, Icons.arrow_forward),
+                controllerButton(buttonSize * 1.2, Icons.arrow_forward, moveRight),
               ],
             ),
             SizedBox(
