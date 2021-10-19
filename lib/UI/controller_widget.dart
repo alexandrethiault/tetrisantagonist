@@ -77,9 +77,18 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
       color: Colors.black54,
       child: Column(
         children: [
-          const Text(
-            "You are the antagonist !",
-            style: TextStyle(color: Colors.white),
+          Expanded(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width/2,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  "You are the antagonist !\n Use your powers to outsmart the other\n players and make them lose !",
+                  style: TextStyle(color: Colors.black54),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           ),
           SizedBox(
             height: 50,
@@ -166,54 +175,64 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     );
   }
 
-  Widget playerInterface(double buttonSize) {
+
+  Widget controllerButton(double buttonSize, IconData icon) {
     return Container(
-      height: 200,
-      width: MediaQuery.of(context).size.width,
+      height: buttonSize,
+      width: buttonSize,
+      decoration: BoxDecoration(color: playerColor, borderRadius: BorderRadius.circular(buttonSize/3),),
+      child: GestureDetector(
+        onTapDown: moveLeft,
+        child: SizedBox(
+            width: buttonSize/2,
+            height: buttonSize/2,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Icon(icon, color: Colors.black87),
+            )),
+      ),
+    );
+  }
+
+  Widget playerInterface(double buttonSize) {
+    return Padding(
       padding: const EdgeInsets.all(8.0),
-      color: Colors.white24,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap: moveLeft,
-            child: SizedBox(
-                width: buttonSize,
-                child: const FittedBox(
+      child: Container(
+        height: MediaQuery.of(context).size.height*0.7,
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.all(10.0),
+        color: Colors.white24,
+        child: Column(
+          children: [
+            Expanded(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width/2,
+                child: FittedBox(
                   fit: BoxFit.contain,
-                  child: Icon(Icons.arrow_back_ios),
-                )),
-          ),
-          InkWell(
-            onTap: rotateLeft,
-            child: SizedBox(
-                width: buttonSize,
-                child: const FittedBox(
-                  fit: BoxFit.contain,
-                  child: Icon(Icons.rotate_left),
-                )),
-          ),
-          const Spacer(),
-          InkWell(
-            onTap: rotateRight,
-            child: SizedBox(
-                width: buttonSize,
-                child: const FittedBox(
-                  fit: BoxFit.contain,
-                  child: Icon(Icons.rotate_right),
-                )),
-          ),
-          InkWell(
-            onTap: moveRight,
-            child: SizedBox(
-                width: buttonSize,
-                child: const FittedBox(
-                  fit: BoxFit.contain,
-                  child: Icon(Icons.arrow_forward_ios),
-                )),
-          ),
-        ],
+                  child: Text(
+                    "You are a player, \ncollaborate with your teammates \nto defeat the antagonist !",
+                      style: TextStyle(color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                controllerButton(buttonSize*1.2, Icons.arrow_back),
+                SizedBox(width: 5,),
+                controllerButton(buttonSize, Icons.rotate_left),
+                Spacer(),
+                controllerButton(buttonSize, Icons.rotate_right),
+                SizedBox(width: 5,),
+                controllerButton(buttonSize*1.2, Icons.arrow_forward),
+              ],
+            ),
+            SizedBox(height: buttonSize/2,),
+          ],
+        ),
       ),
     );
   }
@@ -233,7 +252,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
 
   Widget p2pListView() {
     return Container(
-      color: Colors.white54,
+      color: Colors.black54,
       width: 250,
       height: 100,
       child: getItemCount() == 0
@@ -253,7 +272,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                             onTap: () => _onTabItemListener(device),
                             child: Column(
                               children: [
-                                Text(device.deviceName),
+                                Text(device.deviceName, style: TextStyle(color: Colors.white70),),
                                 Text(
                                   getStateName(device.state),
                                   style: TextStyle(
@@ -272,12 +291,12 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                               padding: const EdgeInsets.all(8.0),
                               height: 35,
                               width: 100,
-                              color: getButtonColor(device.state),
+                              color: getButtonColor(device.state).withOpacity(0.6),
                               child: Center(
                                 child: Text(
                                   getButtonStateName(device.state),
                                   style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.white70,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -314,9 +333,9 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               top: 100,
               child: connected
                   ? role == PlayerRole.player
-                      ? playerInterface(MediaQuery.of(context).size.width / 6)
+                      ? playerInterface(MediaQuery.of(context).size.width / 7)
                       : foeInterface()
-                  : const Text("Awaiting for role"),
+                  : const Text("You don't have a role yet."),
             ),
             Positioned(
               top: 0,
@@ -328,22 +347,22 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     );
   }
 
-  void moveLeft() {
+  void moveLeft(TapDownDetails details) {
     print("[ControllerWidget] Move left");
     nearbyService.sendMessage(currentHost.deviceId, "Left");
   }
 
-  void moveRight() {
+  void moveRight(TapDownDetails details) {
     print("[ControllerWidget] Move right");
     nearbyService.sendMessage(currentHost.deviceId, "Right");
   }
 
-  void rotateLeft() {
+  void rotateLeft(TapDownDetails details) {
     print("[ControllerWidget] Turn left");
     nearbyService.sendMessage(currentHost.deviceId, "TurnLeft");
   }
 
-  void rotateRight() {
+  void rotateRight(TapDownDetails details) {
     print("[ControllerWidget] Turn right");
     nearbyService.sendMessage(currentHost.deviceId, "TurnRight");
   }
