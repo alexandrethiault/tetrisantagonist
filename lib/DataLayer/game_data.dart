@@ -12,31 +12,34 @@ import 'tetromino.dart';
 // data that can't stay inside GameState and must be exposed to other widgets
 class GameData with ChangeNotifier {
 
+  // peer to peer stuff
   late NearbyService nearbyService;
   List<Device> _connectedDevices = [];
   HashMap<String, int> deviceIdToPlayerId = HashMap<String, int>();
   HashMap<int, String> playerIdToDeviceId = HashMap<int, String>();
-  int maxPlayerId = 0;
+  int maxPlayerId = 0; // playerId can be 0, 1, 2 or 3
 
-  bool isLaunched = false;
-  int roundNumber = 0;
+  bool isLaunched = false; // related to the start/stop button
+  int roundNumber = 0; // unused
 
-  List<int> scores = [0, 0, 0, 0];
+  List<int> scores = [0, 0, 0, 0]; // scores of the up to 4 players
 
-  List<Tetromino> curTetrominos = <Tetromino>[];
-  List<Tetromino> nextTetrominos = <Tetromino>[];
-  List<Square> groundSquares = <Square>[];
+  List<Tetromino> curTetrominos = <Tetromino>[]; // currently falling in the grid
+  List<Tetromino> nextTetrominos = <Tetromino>[]; // queue, will fall later
+  List<Square> groundSquares = <Square>[]; // tetrominos that reached the ground
+
+  // cool down variables we must change to allow the Antagonist:SendCombo trick
   int coolDownFall = 0;
   int coolDownSpeed = 1;
   int coolDownUntilReset = 0;
 
   int antagonist = 1; // player id of who's the antagonist
-  double energy = 0.0;
-  int antagonistLives = 0;
-  int lineBeingDeletedStep = 0;
+  double energy = 0.0; // simulate the actual energy stored in the antagonist's device
+  int antagonistLives = 0; // starts at N, when it reaches 0, the antagonist has lost
+  int lineBeingDeletedStep = 0; // 2->1->0, used to control the display of laser.png
 
-  int nextPlayer = 0;
-  int nextDropIndex = 2;
+  int nextPlayer = 0; // playerId of the nextPlayer to spawn a tetromino
+  int nextDropIndex = 2; // 1->2->3->2-< makes the tetrominos fall from varying x pos
 
   bool gameIsOver = false;
 
@@ -208,7 +211,7 @@ class GameData with ChangeNotifier {
         energy = double.parse(imported);
       } else if (command == "Antagonist:SendCombo") {
         // send 3 tetrominos almost at the same time
-        energyNeeded = 0.7;
+        energyNeeded = 0.5;
         if (energy < energyNeeded) {
           return false;
         }
@@ -217,7 +220,7 @@ class GameData with ChangeNotifier {
         coolDownUntilReset = 3;
       } else if (command == "Antagonist:SwitchFalling") {
         // switch the two lowest falling tetrominos' shapes and colors
-        energyNeeded = 0.3;
+        energyNeeded = 0.7;
         if (energy < energyNeeded) {
           return false;
         }
@@ -383,6 +386,8 @@ class GameData with ChangeNotifier {
     if (antagonistId != null) {
       nearbyService.sendMessage(antagonistId, "WhatIsNext?");
     }
+
+    scores[antagonist] += 2;
 
     // Test game over condition
     return !curTetromino.collidesWithGroundSquares(groundSquares);
