@@ -36,15 +36,16 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   List<Tetromino> tetrominos = [];
 
   Color playerColor = Colors.red;
+  Color defaultTetroColor = Colors.black54;
 
   @override
   void initState() {
     super.initState();
     tetrominos = [
-      Tetromino.random(playerColor),
-      Tetromino.random(playerColor),
-      Tetromino.random(playerColor),
-      Tetromino.random(playerColor)
+      Tetromino.random(defaultTetroColor),
+      Tetromino.random(defaultTetroColor),
+      Tetromino.random(defaultTetroColor),
+      Tetromino.random(defaultTetroColor)
     ];
     init();
   }
@@ -91,7 +92,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                       });
                     },
                     child: Container(
-                        color: Colors.grey, child: const Icon(Icons.arrow_left))),
+                        color: Colors.grey,
+                        child: const Icon(Icons.arrow_left))),
                 ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -108,21 +110,26 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                       });
                     },
                     child: Container(
-                        color: Colors.grey, child: const Icon(Icons.arrow_right))),
+                        color: Colors.grey,
+                        child: const Icon(Icons.arrow_right))),
                 ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        tetrominos[selectedTetromino] = Tetromino.fromType(
-                            7, playerColor, 0);
-                      });
-                    },
-                    child: Container(
-                        color: Colors.grey, child: TetrominoWidget(Tetromino.fromType(
-                        7, playerColor, 0), 10)),),
+                  onPressed: () {
+                    setState(() {
+                      tetrominos[selectedTetromino] =
+                          Tetromino.fromType(7, defaultTetroColor, 0);
+                    });
+                  },
+                  child: Container(
+                      color: Colors.grey,
+                      child: TetrominoWidget(
+                          Tetromino.fromType(7, defaultTetroColor, 0), 10)),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 5,),
+          const SizedBox(
+            height: 5,
+          ),
           SizedBox(
             height: 100,
             width: MediaQuery.of(context).size.width * 0.8,
@@ -132,16 +139,20 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    if (index !=4) {
+                    if (index != 4) {
                       setState(() {
                         selectedTetromino = index;
                       });
                     }
                   },
                   child: Container(
-                    decoration: BoxDecoration(color: index == selectedTetromino
-                        ? Colors.white70
-                        : Colors.white24,border: Border.all(width: index == 4 ? 8 : 0,color: Colors.black54)),
+                      decoration: BoxDecoration(
+                          color: index == selectedTetromino
+                              ? Colors.white70
+                              : Colors.white24,
+                          border: Border.all(
+                              width: index == 4 ? 8 : 0,
+                              color: Colors.black54)),
                       height: 100,
                       width: 100,
                       child: Center(
@@ -207,68 +218,84 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     );
   }
 
+  Widget awaitingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Text("searching for host..."),
+          SizedBox(height: 10,),
+          SizedBox(height: 30, width: 30, child: CircularProgressIndicator(color: Colors.white70,)),
+        ],
+      ),
+    );
+  }
+
   Widget p2pListView() {
     return Container(
       color: Colors.white54,
       width: 250,
       height: 100,
-      child: ListView.builder(
-          itemCount: getItemCount(),
-          itemBuilder: (context, index) {
-            final device = devices[index];
-            return Container(
-              margin: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Row(
+      child: getItemCount() == 0
+          ? awaitingIndicator()
+          : ListView.builder(
+              itemCount: getItemCount(),
+              itemBuilder: (context, index) {
+                final device = devices[index];
+                return Container(
+                  margin: const EdgeInsets.all(8.0),
+                  child: Column(
                     children: [
-                      Expanded(
-                          child: GestureDetector(
-                        onTap: () => _onTabItemListener(device),
-                        child: Column(
-                          children: [
-                            Text(device.deviceName),
-                            Text(
-                              getStateName(device.state),
-                              style:
-                                  TextStyle(color: getStateColor(device.state)),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: GestureDetector(
+                            onTap: () => _onTabItemListener(device),
+                            child: Column(
+                              children: [
+                                Text(device.deviceName),
+                                Text(
+                                  getStateName(device.state),
+                                  style: TextStyle(
+                                      color: getStateColor(device.state)),
+                                ),
+                              ],
+                              crossAxisAlignment: CrossAxisAlignment.start,
                             ),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                        ),
-                      )),
-                      // Request connect
-                      GestureDetector(
-                        onTap: () => _onButtonClicked(device),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                          padding: const EdgeInsets.all(8.0),
-                          height: 35,
-                          width: 100,
-                          color: getButtonColor(device.state),
-                          child: Center(
-                            child: Text(
-                              getButtonStateName(device.state),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
+                          )),
+                          // Request connect
+                          GestureDetector(
+                            onTap: () => _onButtonClicked(device),
+                            child: Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: const EdgeInsets.all(8.0),
+                              height: 35,
+                              width: 100,
+                              color: getButtonColor(device.state),
+                              child: Center(
+                                child: Text(
+                                  getButtonStateName(device.state),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 8.0,
+                      ),
+                      const Divider(
+                        height: 1,
+                        color: Colors.grey,
                       )
                     ],
                   ),
-                  const SizedBox(
-                    height: 8.0,
-                  ),
-                  const Divider(
-                    height: 1,
-                    color: Colors.grey,
-                  )
-                ],
-              ),
-            );
-          }),
+                );
+              }),
     );
   }
 
@@ -477,7 +504,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void syncEnergy(int energy) {
-    nearbyService.sendMessage(currentHost.deviceId, "Antagonist:updateEnergy"+energy.toString());
+    nearbyService.sendMessage(
+        currentHost.deviceId, "Antagonist:updateEnergy" + energy.toString());
   }
 
   void applyCommand(String command) {
@@ -493,12 +521,13 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     if (command.startsWith("WhatIsNext?")) {
       Tetromino t = tetrominos[3];
       setState(() {
-        tetrominos.removeAt(tetrominos.length-1);
-        tetrominos.insert(0, Tetromino.random(playerColor));
-        if (tetrominos.length < 5) tetrominos.insert(0, Tetromino.random(playerColor));
+        tetrominos.removeAt(tetrominos.length - 1);
+        tetrominos.insert(0, Tetromino.random(defaultTetroColor));
+        if (tetrominos.length < 5)
+          tetrominos.insert(0, Tetromino.random(defaultTetroColor));
       });
-      nearbyService.sendMessage(currentHost.deviceId, "Antagonist:UpdateNextTetromino"+t.export());
+      nearbyService.sendMessage(
+          currentHost.deviceId, "Antagonist:UpdateNextTetromino" + t.export());
     }
-
   }
 }
