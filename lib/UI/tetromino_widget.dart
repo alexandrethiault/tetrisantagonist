@@ -31,7 +31,7 @@ Widget TetrominoWidget(Tetromino tetromino, double width) {
         rows.add(Container(width: width, height: width, color: color));
       } else {
         rows.add(Container(width: width, height: width,
-            decoration: SquareDecoration(color, tetromino.isFrozen)));
+            decoration: SquareDecoration(color, tetromino.isFrozen, tetromino.isBomb)));
       }
     }
 

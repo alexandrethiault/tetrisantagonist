@@ -44,6 +44,11 @@ X X .X X .X X .X X .
  X  . X  . X  . X  .
     .    .    .    .
 ....................
+X   .X   .X   .X   .
+    .    .    .    .
+    .    .    .    .
+    .    .    .    .
+....................
 """;
 
 // Tetrominos are made of 4 Square and have 4 possible rotations
@@ -76,7 +81,7 @@ class Tetromino {
       for (int k in [0,1,2,3]) { // iterate through possible rotations
         for (int j = 0; j < 4; j++) { // iterate through columns 5*k to 5*k+3
           if (lines[5*_type+i][5*k+j] == "X") {
-            rotations[k].add(Square(i, j, color));
+            rotations[k].add(Square(j, i, color));
           }
         }
       }
@@ -167,7 +172,9 @@ class Tetromino {
 
   int get height => maxX - minX + 1;
 
-  bool get isFrozen => (_isFrozen==1);
+  bool get isFrozen => (_isFrozen == 1);
+
+  bool get isBomb => (baseSquares.length == 1);
 
   void freeze() {
     _isFrozen = 1;
