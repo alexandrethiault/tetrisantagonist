@@ -1,3 +1,6 @@
+import 'package:flame/animation.dart' as animation;
+import 'package:flame/flame.dart';
+import 'package:flame/position.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
@@ -42,12 +45,12 @@ class GameWidgetState extends State<GameWidget> {
   }
 
   Stack _squareStack() {
-    List<Positioned> stackChildren = <Positioned>[];
+    List<Positioned> squareChildren = <Positioned>[];
     List<Square> groundSquares = Provider.of<GameData>(context).groundSquares;
     List<Tetromino> curTetrominos =
         Provider.of<GameData>(context).curTetrominos;
     if (groundSquares.isEmpty && curTetrominos.isEmpty) {
-      return Stack(children: stackChildren);
+      return Stack(children: squareChildren);
     }
 
     final RenderBox renderBoxTetris =
@@ -56,7 +59,7 @@ class GameWidgetState extends State<GameWidget> {
         (renderBoxTetris.size.width - 2 * DEFAULT_BORDER_WIDTH) / GRID_WIDTH;
 
     for (Square square in groundSquares) {
-      stackChildren.add(Positioned(
+      squareChildren.add(Positioned(
         left: square.x * width,
         top: square.y * width,
         child: Container(
@@ -71,7 +74,7 @@ class GameWidgetState extends State<GameWidget> {
       List<Square> fallingSquares =
           curTetromino.rotations[curTetromino.rotationIndex];
       for (Square square in fallingSquares) {
-        stackChildren.add(
+        squareChildren.add(
           Positioned(
             left: (square.x + curTetromino.x) * width,
             top: (square.y + curTetromino.y) * width,
@@ -89,8 +92,8 @@ class GameWidgetState extends State<GameWidget> {
     int oldIndex = Provider.of<GameData>(context).oldDropIndex();
     antagonistLeftConstraint = width * GRID_WIDTH / 4 * oldIndex - 5 * width;
 
-    return Stack(children: [
-      ...stackChildren,
+    List<Widget> stackChildren = [
+      ...squareChildren,
       AnimatedPositioned(
         top: 0,
         left: antagonistLeftConstraint,
@@ -100,7 +103,18 @@ class GameWidgetState extends State<GameWidget> {
           width: width * 10,
           child: const Antagonist(),
         ),
-      ),
-    ]);
+      )
+    ];
+/*
+    if (groundSquares.length == 16) {
+      stackChildren.add(Flame.util.animationAsWidget(
+          Position(100, 43),
+          animation.Animation.sequenced('laser.png', 6,
+              textureWidth: renderBoxTetris.size.width*0+50, textureHeight: width*0+100,
+              loop: false, stepTime: 0.1)
+      ));
+    }
+*/
+    return Stack(children: stackChildren);
   }
 }
