@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,6 +34,9 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   late StreamSubscription subscription;
   late StreamSubscription receivedDataSubscription;
 
+  double energy = 0;
+  Timer timer = Timer.periodic(DURATION, (timer) => {});
+
   List<Tetromino> tetrominos = [];
 
   Color playerColor = Colors.red;
@@ -47,7 +51,14 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
       Tetromino.random(defaultTetroColor),
       Tetromino.random(defaultTetroColor)
     ];
+    timer = Timer.periodic(DURATION, incrementEnergy);
     init();
+  }
+
+  void incrementEnergy(Timer timer) {
+    setState(() {
+      energy = min(1, energy + energyIncrement);
+    });
   }
 
   @override
@@ -57,6 +68,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     nearbyService.stopAdvertisingPeer();
     super.dispose();
   }
+
+
 
   lockTetromino(int id) {
     tetrominos[id].freeze();
@@ -71,15 +84,49 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     }
   }
 
+  void sendCursed() {
+    if (PayEnergy(0.7))
+    setState(() {
+      tetrominos[0] =
+          Tetromino.fromType(7, defaultTetroColor, 0);
+    });
+  }
+
+  void sendBomb() {
+    if (PayEnergy(0.4))
+    setState(() {
+      tetrominos[0] =
+          Tetromino.fromType(8, defaultTetroColor, 0);
+    });
+  }
+
   Widget foeInterface(double buttonSize) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.all(8),
       color: Colors.black54,
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Expanded(
+          Positioned(
+              bottom: buttonSize/2,
+              left: 6*buttonSize/2,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(primary: energy > 0.5 ? playerColor : Colors.grey),
+                onPressed: () => energy > 0.5 ? sendCombo() : null,
+                child: Icon(Icons.arrow_drop_down_circle),
+              )),
+          Positioned(
+              bottom: buttonSize/2,
+              left: 4*buttonSize/2,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(primary: energy > 0.7 ? playerColor : Colors.grey),
+                onPressed: () => energy > 0.7 ?  swithcFalling() : null,
+                child: Icon(Icons.switch_left_rounded),
+              )),
+          Positioned(
+            top: 0,
             child: SizedBox(
               width: MediaQuery.of(context).size.width / 2,
               child: FittedBox(
@@ -92,40 +139,50 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               ),
             ),
           ),
-          Expanded(
+          Positioned(
+            bottom: buttonSize/2,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Stack(
+                  children: [
+                    Container(
+                      color: Colors.black54,
+                      width: buttonSize/4,
+                      height: buttonSize*2,
+                    ),
+                    Container(
+                      color: Colors.yellow,
+                      width: buttonSize/4,
+                      height: buttonSize*2*energy,
+                    ),
+                  ],
+                ),
+                SizedBox(width: 10,),
                 Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          tetrominos[0] =
-                              Tetromino.fromType(8, defaultTetroColor, 0);
-                        });
-                      },
+                      style: ElevatedButton.styleFrom(primary: energy > 0.4 ? playerColor : Colors.grey),
+                      onPressed: () => energy > 0.5 ? sendBomb() : null,
                       child: TetrominoWidget(
                           Tetromino.fromType(8, defaultTetroColor, 0), 10),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          tetrominos[0] =
-                              Tetromino.fromType(7, defaultTetroColor, 0);
-                        });
-                      },
+                      style: ElevatedButton.styleFrom(primary: energy > 0.7 ? playerColor : Colors.grey),
+                      onPressed: () => energy > 0.5 ? sendCursed() : null,
                       child: TetrominoWidget(
                           Tetromino.fromType(7, defaultTetroColor, 0), 10),
                     ),
-                    SizedBox(
-                        height: buttonSize,
-                        child: FittedBox(
-                            child: Icon(
-                          Icons.double_arrow,
-                          color: playerColor,
-                        ))),
                   ],
                 ),
+                SizedBox(
+                    width: buttonSize / 2,
+                    child: FittedBox(
+                        child: Icon(
+                      Icons.double_arrow,
+                      color: playerColor,
+                    ))),
                 SizedBox(
                   height: buttonSize,
                   width: buttonSize * 5,
@@ -197,8 +254,8 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                                   ),
                                 if (index == selectedTetromino)
                                   Positioned(
-                                    top: buttonSize/ 20,
-                                    left: buttonSize/20,
+                                    top: buttonSize / 20,
+                                    left: buttonSize / 20,
                                     child: GestureDetector(
                                         onTap: () {
                                           setState(() {
@@ -209,16 +266,17 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                                           decoration: BoxDecoration(
                                               color: Colors.grey,
                                               borderRadius:
-                                                  BorderRadius.circular(10),
+                                                  BorderRadius.circular(5),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black54,
                                                   offset: const Offset(
-                                                    2.0, 2.0,
+                                                    2.0,
+                                                    2.0,
                                                   ),
                                                 )
                                               ]),
-                                          height: buttonSize / 5,
+                                          height: buttonSize / 4.5,
                                           width: buttonSize / 4,
                                           child: const Icon(
                                               Icons.lock_outline_rounded),
@@ -604,9 +662,22 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     }
   }
 
-  void syncEnergy(int energy) {
+  void sendCombo() {
+    nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SendCombo");
+  }
+
+  void swithcFalling() {
+    nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SwitchFalling");
+  }
+
+  bool PayEnergy(double cost) {
+    if (energy < cost) return false;
+    setState(() {
+      energy -= cost;
+    });
     nearbyService.sendMessage(
         currentHost.deviceId, "Antagonist:updateEnergy" + energy.toString());
+    return true;
   }
 
   void applyCommand(String command) {
@@ -622,9 +693,14 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     if (command.startsWith("WhatIsNext?")) {
       Tetromino t = tetrominos[3];
       setState(() {
-        tetrominos.insert(0, Tetromino.random(defaultTetroColor));
+        tetrominos.insert(
+            0,
+            Random().nextInt(15) == 1
+                ? Tetromino.fromType(8, defaultTetroColor)
+                : Tetromino.random(defaultTetroColor));
         if (tetrominos.length < 5)
           tetrominos.insert(0, Tetromino.random(defaultTetroColor));
+        selectedTetromino = min(selectedTetromino + 1, 3);
       });
       nearbyService.sendMessage(
           currentHost.deviceId, "Antagonist:UpdateNextTetromino" + t.export());

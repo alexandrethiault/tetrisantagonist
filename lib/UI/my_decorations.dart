@@ -24,7 +24,7 @@ BoxDecoration EnergyBarDecoration([double radius=DEFAULT_BORDER_RADIUS]) => BoxD
 BoxDecoration SquareDecoration(Color squareColor, [bool frozen=false, bool isBomb=false]) => BoxDecoration(
   border: Border.all(
     color: (isBomb) ? squareBombColor : ((frozen) ? squareFrozenColor : squareBorderColor),
-    width: squareBorderWidth,
+    width: isBomb ? 2*squareBorderWidth : squareBorderWidth,
   ),
   color: squareColor
 );
