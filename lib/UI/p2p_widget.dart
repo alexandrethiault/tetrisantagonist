@@ -88,9 +88,12 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
                         onTap: () => _onTabItemListener(device),
                         child: Column(
                           children: [
-                            Text(
-                              device.deviceName,
-                              overflow: TextOverflow.clip,
+                            FittedBox(
+                              fit:BoxFit.contain,
+                              child: Text(
+                                device.deviceName,
+                                overflow: TextOverflow.clip,
+                              ),
                             ),
                           ],
                           crossAxisAlignment: CrossAxisAlignment.start,
