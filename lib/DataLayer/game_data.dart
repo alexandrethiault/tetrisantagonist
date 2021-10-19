@@ -11,7 +11,7 @@ import 'tetromino.dart';
 
 const int GRID_WIDTH = 15;
 const int GRID_HEIGHT = 24;
-const Duration DURATION = Duration(milliseconds: 250);
+const Duration DURATION = Duration(milliseconds: 300);
 const int COOL_DOWN_INIT = 15;
 
 // data that can't stay inside GameState and must be exposed to other widgets
@@ -141,7 +141,7 @@ class GameData with ChangeNotifier {
     groundSquares = <Square>[];
 
     energy = 0.5;
-    antagonistLives = 1;
+    antagonistLives = 2;
 
     timer = Timer.periodic(DURATION, onPlay);
 
@@ -277,6 +277,7 @@ class GameData with ChangeNotifier {
 
   void onPlay(Timer timer) {
     // Change tetrominos which reached the ground into ground squares
+    _deleteFullLines();
     for (int iCur = curTetrominos.length-1; iCur >= 0; iCur--) {
       Tetromino curTetromino = curTetrominos[iCur];
       int? playerId = colorToPlayerId[curTetromino.color.toString()];
@@ -287,7 +288,7 @@ class GameData with ChangeNotifier {
           // Not fully inside the screen when reached ground squares: game over
           return triggerGameOver(true);
         }
-        int linesSkipped = _deleteFullLines();
+        int linesSkipped = _detectFullLines();
         _incrementScoresLineDeleted((playerId!=null) ? playerId : -1, linesSkipped);
         _removeFromCurTetrominos(curTetromino);
       } else {
@@ -391,6 +392,10 @@ class GameData with ChangeNotifier {
   // When a line is completed, delete its ground squares
   // and move one level down all squares above
   int _deleteFullLines() {
+    return _detectFullLines(true);
+  }
+
+  int _detectFullLines([bool deleteThem=false]) {
     List<bool> tab = List.filled(GRID_HEIGHT*GRID_WIDTH, false);
     List<Color> color = List.filled(GRID_HEIGHT*GRID_WIDTH, Colors.grey);
     List<int> count = List.filled(GRID_HEIGHT, 0);
@@ -412,16 +417,30 @@ class GameData with ChangeNotifier {
       return 0;
     }
 
-    groundSquares.clear();
     int linesSkipped = 0;
-    for (int line = GRID_HEIGHT-1; line>=0; line--) {
-      if (count[line] == GRID_WIDTH) {
-        linesSkipped++;
-      } else {
-        for (int column = 0; column<GRID_WIDTH; column++) {
-          int idx = line*GRID_WIDTH + column;
-          if (tab[idx]) {
-            groundSquares.add(Square(column, line+linesSkipped, color[idx]));
+    if (!deleteThem) { // just count them
+      for (int line = GRID_HEIGHT - 1; line >= 0; line--) {
+        if (count[line] == GRID_WIDTH) {
+          linesSkipped++;
+          for (Square square in groundSquares) {
+            if (square.y == line) {
+              square.color = Colors.white;
+            }
+          }
+        }
+      }
+    } else {
+      groundSquares.clear();
+      for (int line = GRID_HEIGHT - 1; line >= 0; line--) {
+        if (count[line] == GRID_WIDTH) {
+          linesSkipped++;
+        } else {
+          for (int column = 0; column < GRID_WIDTH; column++) {
+            int idx = line * GRID_WIDTH + column;
+            if (tab[idx]) {
+              groundSquares.add(
+                  Square(column, line + linesSkipped, color[idx]));
+            }
           }
         }
       }

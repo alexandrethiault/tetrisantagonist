@@ -24,7 +24,7 @@ class _RoundNumberState extends State<RoundNumber> {
         children: <Widget>[
           const SizedBox(height: SIZED_BOX_SIZE),
           const Text(
-            'Round',
+            'Lines to fill',
             style: TextStyle(
                 color: BORDERS_COLOR,
                 fontWeight: FontWeight.bold,
@@ -40,7 +40,7 @@ class _RoundNumberState extends State<RoundNumber> {
                 decoration: GameBoxDecoration(DEFAULT_BORDER_RADIUS-2*DEFAULT_BORDER_WIDTH),
                 child: Center(
                   child: Text(
-                    Provider.of<GameData>(context).roundNumber.toString(),
+                    Provider.of<GameData>(context).antagonistLives.toString(),
                     style: const TextStyle(
                         color: BORDERS_COLOR,
                         fontWeight: FontWeight.bold,
