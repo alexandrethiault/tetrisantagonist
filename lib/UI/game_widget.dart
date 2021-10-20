@@ -6,8 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:tetrisserver/DataLayer/game_data.dart';
 import 'package:tetrisserver/DataLayer/square.dart';
 import 'package:tetrisserver/DataLayer/tetromino.dart';
-import 'package:tetrisserver/UI/antagonist_widget.dart';
+import 'package:tetrisserver/UI/antagonist_widget_blue.dart';
 
+import 'antagonist_widget_green.dart';
+import 'antagonist_widget_red.dart';
+import 'antagonist_widget_yellow.dart';
 import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
 
@@ -49,6 +52,7 @@ class GameWidgetState extends State<GameWidget> {
     List<Square> groundSquares = Provider.of<GameData>(context).groundSquares;
     List<Tetromino> curTetrominos =
         Provider.of<GameData>(context).curTetrominos;
+    int antagId = Provider.of<GameData>(context).antagonist;
     if (groundSquares.isEmpty && curTetrominos.isEmpty) {
       return Stack(children: squareChildren);
     }
@@ -94,16 +98,58 @@ class GameWidgetState extends State<GameWidget> {
 
     List<Widget> stackChildren = [
       ...squareChildren,
-      AnimatedPositioned(
-        top: 0,
-        left: antagonistLeftConstraint,
-        duration: const Duration(milliseconds: 200),
-        child: SizedBox(
-          height: width * 10,
-          width: width * 10,
-          child: const Antagonist(),
+      Visibility(
+        visible: antagId == 0,
+        child: AnimatedPositioned(
+          top: 0,
+          left: antagonistLeftConstraint,
+          duration: const Duration(milliseconds: 200),
+          child: SizedBox(
+            height: width * 10,
+            width: width * 10,
+            child: const Antagonist_red(),
+          ),
         ),
-      )
+      ),
+      Visibility(
+        visible: antagId == 1,
+        child: AnimatedPositioned(
+          top: 0,
+          left: antagonistLeftConstraint,
+          duration: const Duration(milliseconds: 200),
+          child: SizedBox(
+            height: width * 10,
+            width: width * 10,
+            child: const Antagonist_blue(),
+          ),
+        ),
+      ),
+      Visibility(
+        visible: antagId == 2,
+        child: AnimatedPositioned(
+          top: 0,
+          left: antagonistLeftConstraint,
+          duration: const Duration(milliseconds: 200),
+          child: SizedBox(
+            height: width * 10,
+            width: width * 10,
+            child: const Antagonist_green(),
+          ),
+        ),
+      ),
+      Visibility(
+        visible: antagId == 3,
+        child: AnimatedPositioned(
+          top: 0,
+          left: antagonistLeftConstraint,
+          duration: const Duration(milliseconds: 200),
+          child: SizedBox(
+            height: width * 10,
+            width: width * 10,
+            child: const Antagonist_yellow(),
+          ),
+        ),
+      ),
     ];
 
     int step = Provider.of<GameData>(context).lineBeingDeletedStep;
@@ -121,6 +167,21 @@ class GameWidgetState extends State<GameWidget> {
                   textureX: (step-1) * 150,
                   loop: false, stepTime: 0.1)
           ))
+      ));
+      stackChildren.add(Positioned(
+        top: 0,
+        left: antagonistLeftConstraint,
+          child: SizedBox(
+            height: width * 10,
+            width: width * 10,
+            child: FittedBox(
+              fit : BoxFit.contain,
+              child: Flame.util.animationAsWidget(
+                  Position(ANTAGONIST_WIDTH, ANTAGONIST_HEIGHT),
+                  animation.Animation.sequenced('Nemesis_damage.png', ANTAGONIST_AMOUNT,
+                      textureWidth: ANTAGONIST_WIDTH, textureHeight: ANTAGONIST_HEIGHT)),
+            ),
+          ),
       ));
     }
 

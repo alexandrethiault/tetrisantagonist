@@ -33,4 +33,4 @@ const Color squareFrozenColor = Colors.grey;
 const Color squareBombColor = Colors.black54;
 const double squareBorderWidth = 3.0;
 
-const double energyIncrement = 0.005;
+const double energyIncrement = 0.008;

@@ -49,6 +49,7 @@ class GameData with ChangeNotifier {
   void dispose() {
     nearbyService.stopBrowsingForPeers();
     nearbyService.stopAdvertisingPeer();
+    timer.cancel();
     super.dispose();
   }
 
@@ -198,7 +199,6 @@ class GameData with ChangeNotifier {
       if (playerSendingCommand != -1 && playerSendingCommand != antagonist) {
         return false;
       }
-      double energyNeeded = 0.0;
       if (command.startsWith("Antagonist:UpdateNextTetromino")) {
         // ex: UpdateNextTetromino[7,2,1] -> type (0 to 7), rotationIndex (0 to 3), isFrozen (0 or 1)
         String imported = command.substring("Antagonist:UpdateNextTetromino".length);
@@ -213,19 +213,12 @@ class GameData with ChangeNotifier {
         energy = double.parse(imported);
       } else if (command == "Antagonist:SendCombo") {
         // send 3 tetrominos almost at the same time
-        energyNeeded = 0.5;
-        if (energy < energyNeeded) {
-          return false;
-        }
         coolDownFall = 10000;
         coolDownSpeed = COOL_DOWN_INIT ~/ 2;
         coolDownUntilReset = 3;
       } else if (command == "Antagonist:SwitchFalling") {
         // switch the two lowest falling tetrominos' shapes and colors
-        energyNeeded = 0.7;
-        if (energy < energyNeeded) {
-          return false;
-        }
+
         List<Tetromino> newCurTetrominos = <Tetromino>[];
         for (Tetromino tetromino in curTetrominos) {
           newCurTetrominos.add(tetromino.copy());
@@ -250,7 +243,6 @@ class GameData with ChangeNotifier {
         nextTetrominos[0].color = Colors.grey;
         print("[game_data.dart/applyCommand] Tried to apply an unknown antagonist command");
       }
-      energy -= energyNeeded;
       notifyListeners();
       return true;
     } else {

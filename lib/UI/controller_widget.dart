@@ -69,12 +69,14 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     subscription.cancel();
     nearbyService.stopBrowsingForPeers();
     nearbyService.stopAdvertisingPeer();
+    timer.cancel();
     super.dispose();
   }
 
 
 
   lockTetromino(int id) {
+    if (payEnergy(0.2))
     tetrominos[id].freeze();
   }
 
@@ -88,7 +90,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void sendCursed() {
-    if (PayEnergy(0.7))
+    if (payEnergy(0.7))
     setState(() {
       tetrominos[0] =
           Tetromino.fromType(7, defaultTetroColor, 0);
@@ -96,7 +98,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void sendBomb() {
-    if (PayEnergy(0.4))
+    if (payEnergy(0.4))
     setState(() {
       tetrominos[0] =
           Tetromino.fromType(8, defaultTetroColor, 0);
@@ -125,7 +127,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               left: 4*buttonSize/2,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(primary: energy > 0.7 ? playerColor : Colors.grey),
-                onPressed: () => energy > 0.7 ?  swithcFalling() : null,
+                onPressed: () => energy > 0.7 ?  switchFalling() : null,
                 child: Icon(Icons.switch_left_rounded),
               )),
           Positioned(
@@ -150,14 +152,14 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                 Stack(
                   children: [
                     Container(
-                      color: Colors.black54,
+                      color: playerColor,
                       width: buttonSize/4,
                       height: buttonSize*2,
                     ),
                     Container(
-                      color: Colors.yellow,
+                      color: Colors.black87,
                       width: buttonSize/4,
-                      height: buttonSize*2*energy,
+                      height: buttonSize*2*(1-energy),
                     ),
                   ],
                 ),
@@ -167,7 +169,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(primary: energy > 0.4 ? playerColor : Colors.grey),
-                      onPressed: () => energy > 0.5 ? sendBomb() : null,
+                      onPressed: () => energy > 0.4 ? sendBomb() : null,
                       child: TetrominoWidget(
                           Tetromino.fromType(8, defaultTetroColor, 0), 10),
                     ),
@@ -262,12 +264,12 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                                     child: GestureDetector(
                                         onTap: () {
                                           setState(() {
-                                            lockTetromino(selectedTetromino);
+                                            energy > 0.2 ? lockTetromino(selectedTetromino) : null;
                                           });
                                         },
                                         child: Container(
                                           decoration: BoxDecoration(
-                                              color: Colors.grey,
+                                              color:  energy > 0.2 ? playerColor : Colors.grey,
                                               borderRadius:
                                                   BorderRadius.circular(5),
                                               boxShadow: [
@@ -666,20 +668,22 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void sendCombo() {
+    if (payEnergy(0.5))
     nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SendCombo");
   }
 
-  void swithcFalling() {
+  void switchFalling() {
+    if (payEnergy(0.7))
     nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SwitchFalling");
   }
 
-  bool PayEnergy(double cost) {
+  bool payEnergy(double cost) {
     if (energy < cost) return false;
     setState(() {
       energy -= cost;
     });
     nearbyService.sendMessage(
-        currentHost.deviceId, "Antagonist:updateEnergy" + energy.toString());
+        currentHost.deviceId, "Antagonist:UpdateEnergy" + energy.toString());
     return true;
   }
 
