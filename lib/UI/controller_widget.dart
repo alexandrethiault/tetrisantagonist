@@ -74,6 +74,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   Widget foeInterface(double buttonSize) {
+    // The UI of the antagonist player
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       width: MediaQuery.of(context).size.width,
@@ -270,6 +271,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   Widget controllerButton(double buttonSize, IconData icon, Function(TapDownDetails) func) {
+    // returns one basic button of the player controller with the right size, icon and function
     return Container(
       height: buttonSize,
       width: buttonSize,
@@ -278,7 +280,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
         borderRadius: BorderRadius.circular(buttonSize / 3),
       ),
       child: GestureDetector(
-        onTapDown: func,
+        onTapDown: func, //using onTapDown instead of onTap to prevent input lag
         child: SizedBox(
             width: buttonSize / 2,
             height: buttonSize / 2,
@@ -291,6 +293,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   Widget playerInterface(double buttonSize) {
+    // returns a basic player interface with 4 movement buttons
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -334,6 +337,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   Widget awaitingIndicator() {
+    // Returns a loading visual cue
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -349,6 +353,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   Widget p2pListView() {
+    // returns a widget displaying the discovered devices
     return Container(
       color: Colors.black54,
       width: 250,
@@ -455,6 +460,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void init() async {
+    //inits the p2p parameters
     nearbyService = NearbyService();
     String devInfo = '';
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -557,6 +563,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   _onTabItemListener(Device device) {
+    // debug feature. allows to send a custom message by clicking the host name
     if (device.state == SessionState.connected) {
       showDialog(
         context: context,
@@ -611,11 +618,13 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void lockTetromino(int id) {
+    // prevents the selected tetromino from being rotated
     if (!payEnergy(0.2)) return;
     tetrominos[id].freeze();
   }
 
   void swapTetromino(int index, int index2) {
+    // inverts the position of the tetrominos on the incomming list
     if (index2 >= 0 && index2 < 4) {
       Tetromino temp = tetrominos[index];
       tetrominos[index] = tetrominos[index2];
@@ -625,6 +634,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void sendCursed() {
+    //adds a "cursed" tetromino to the incomming list
     if (!payEnergy(0.7)) return;
     setState(() {
       tetrominos[0] = Tetromino.fromType(7, defaultTetroColor, 0);
@@ -632,6 +642,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void sendBomb() {
+    //adds a bomb to the incomming list
     if (!payEnergy(0.4)) return;
     setState(() {
       tetrominos[0] = Tetromino.fromType(8, defaultTetroColor, 0);
@@ -639,18 +650,21 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void sendCombo() {
+    // sends a command to launch 3 tetrominos in a quick succession
     if (!payEnergy(0.5)) return;
     nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SendCombo");
   }
 
   void switchFalling() {
+    // send command to swap two live falling tetrominos
     if (!payEnergy(0.7)) return;
     nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SwitchFalling");
   }
 
-  // Checks if the antagonist has enough energy
-  // If yes, pays it and updates the host with the new energy level
+
   bool payEnergy(double cost) {
+    // Checks if the antagonist has enough energy
+    // If yes, pays it and updates the host with the new energy level
     if (energy < cost) return false;
     setState(() {
       energy -= cost;
@@ -661,6 +675,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void applyCommand(String command) {
+    // Applies the action corresponding to the message received
     if (command.startsWith("id")) { // what ID the player has (0, 1, 2, 3)
       playerColor = playerColors[int.parse(command[command.length - 1])];
     }
