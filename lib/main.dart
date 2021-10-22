@@ -5,8 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' show ChangeNotifierProvider;
-
-import 'DataLayer/controller_data.dart';
 import 'DataLayer/game_data.dart';
 import 'UI/main_screen.dart';
 import 'UI/controller_widget.dart';
@@ -19,9 +17,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const Home());
     case 'join':
       return MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider(
-              create: (context) => ControllerData(),
-              child: const PlayerControllerWidget()));
+          builder: (_) => const PlayerControllerWidget());
     case 'host':
       return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
