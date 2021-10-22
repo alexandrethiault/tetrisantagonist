@@ -1,8 +1,9 @@
-#Tetris Antagonist
+# Tetris Antagonist
 
 Source code for the Tetris Antagonist mobile application
 
-##Compilation
+## Compilation
+
 In order to compile a debug version of the app, you need to open the code as a Flutter project in Android Studio. See [Flutter's website](https://flutter.dev/docs/get-started/install) for detailed instructions on how to install Android Studio, and how to install Flutter on Android Studio.
 
 Compilation is done upon clicking the green arrow button in Android Studio, with the condition that you have installed an emulator of a compatible phone, for the code to run on, or you have linked to your computer a physical Android phone with developer mode switched on. In the latter case, the cable linking the phone to the computer can be removed after the first compilation, and the app will still be installed and usable by clicking the "tetrisserver" app, found in the list of applications of the phone. This way, it's possible to install the same debug app on several phones, one after the other.
@@ -13,7 +14,7 @@ To create a release version of the app, for Android only, run the following comm
 
 This will produce serveral APK files, including one called `app-armeabi-v7a-release.apk`, found in `build/app/outputs/flutter-apk/`. This APK file can then be send on an Android phone. Clicking it should install the app if the phone is compatible. Warning messages requiring a permission to install an app from unknown sources may happen.
 
-##Usage
+## Usage
 
 In order to connect together, phones or tablets with the app installed must switch wi-fi, geolocation, and bluetooth on, and they shouldn't be more than a few meters apart.
 
