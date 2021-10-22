@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
-import 'package:tetrisserver/DataLayer/tetromino.dart';
-import 'package:tetrisserver/constants/ui_constants.dart';
 
+import '../constants/ui_constants.dart';
+import '../DataLayer/tetromino.dart';
 import 'tetromino_widget.dart';
 
 class PlayerControllerWidget extends StatefulWidget {
@@ -58,7 +58,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void incrementEnergy(Timer timer) {
-    if (hasStarted)
+    if (!hasStarted) return;
     setState(() {
       energy = min(1, energy + energyIncrement);
     });
@@ -71,38 +71,6 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     nearbyService.stopAdvertisingPeer();
     timer.cancel();
     super.dispose();
-  }
-
-
-
-  lockTetromino(int id) {
-    if (payEnergy(0.2))
-    tetrominos[id].freeze();
-  }
-
-  void swapTetromino(int index, int index2) {
-    if (index2 >= 0 && index2 < 4) {
-      Tetromino temp = tetrominos[index];
-      tetrominos[index] = tetrominos[index2];
-      tetrominos[index2] = temp;
-      selectedTetromino = index2;
-    }
-  }
-
-  void sendCursed() {
-    if (payEnergy(0.7))
-    setState(() {
-      tetrominos[0] =
-          Tetromino.fromType(7, defaultTetroColor, 0);
-    });
-  }
-
-  void sendBomb() {
-    if (payEnergy(0.4))
-    setState(() {
-      tetrominos[0] =
-          Tetromino.fromType(8, defaultTetroColor, 0);
-    });
   }
 
   Widget foeInterface(double buttonSize) {
@@ -120,7 +88,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(primary: energy > 0.5 ? playerColor : Colors.grey),
                 onPressed: () => energy > 0.5 ? sendCombo() : null,
-                child: Icon(Icons.arrow_drop_down_circle),
+                child: const Icon(Icons.arrow_drop_down_circle),
               )),
           Positioned(
               bottom: buttonSize/2,
@@ -128,7 +96,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(primary: energy > 0.7 ? playerColor : Colors.grey),
                 onPressed: () => energy > 0.7 ?  switchFalling() : null,
-                child: Icon(Icons.switch_left_rounded),
+                child: const Icon(Icons.switch_left_rounded),
               )),
           Positioned(
             top: 0,
@@ -163,7 +131,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                     ),
                   ],
                 ),
-                SizedBox(width: 10,),
+                const SizedBox(width: 10,),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -219,7 +187,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                                 TetrominoWidget(
                                     tetrominos[index], buttonSize / 6),
                                 if (index == 4)
-                                  Positioned(
+                                  const Positioned(
                                       top: 0,
                                       child: FittedBox(
                                           fit: BoxFit.contain,
@@ -235,9 +203,9 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                                               selectedTetromino - 1);
                                         });
                                       },
-                                      child: FittedBox(
+                                      child: const FittedBox(
                                           fit: BoxFit.contain,
-                                          child: const Icon(Icons.arrow_left)),
+                                          child: Icon(Icons.arrow_left)),
                                     ),
                                   ),
                                 if (index == selectedTetromino)
@@ -251,9 +219,9 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                                                 selectedTetromino + 1);
                                           });
                                         },
-                                        child: FittedBox(
+                                        child: const FittedBox(
                                             fit: BoxFit.contain,
-                                            child: const Icon(
+                                            child: Icon(
                                               Icons.arrow_right,
                                             ))),
                                   ),
@@ -272,10 +240,10 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
                                               color:  energy > 0.2 ? playerColor : Colors.grey,
                                               borderRadius:
                                                   BorderRadius.circular(5),
-                                              boxShadow: [
+                                              boxShadow: const [
                                                 BoxShadow(
                                                   color: Colors.black54,
-                                                  offset: const Offset(
+                                                  offset: Offset(
                                                     2.0,
                                                     2.0,
                                                   ),
@@ -335,7 +303,7 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
             Expanded(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width / 2,
-                child: FittedBox(
+                child: const FittedBox(
                   fit: BoxFit.contain,
                   child: Text(
                     "You are a player, \ncollaborate with your teammates \nto defeat the antagonist!",
@@ -350,21 +318,15 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 controllerButton(buttonSize * 1.2, Icons.arrow_back, moveLeft),
-                SizedBox(
-                  width: 5,
-                ),
+                const SizedBox(width: 5),
                 controllerButton(buttonSize, Icons.rotate_left, rotateRight),
-                Spacer(),
+                const Spacer(),
                 controllerButton(buttonSize, Icons.rotate_right, rotateLeft),
-                SizedBox(
-                  width: 5,
-                ),
+                const SizedBox(width: 5),
                 controllerButton(buttonSize * 1.2, Icons.arrow_forward, moveRight),
               ],
             ),
-            SizedBox(
-              height: buttonSize / 2,
-            ),
+            SizedBox(height: buttonSize / 2),
           ],
         ),
       ),
@@ -375,17 +337,12 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        children: [
+        children: const [
           Text("searching for host..."),
-          SizedBox(
-            height: 10,
+          SizedBox(height: 10),
+          SizedBox(height: 30, width: 30,
+              child: CircularProgressIndicator(color: Colors.white70)
           ),
-          SizedBox(
-              height: 30,
-              width: 30,
-              child: CircularProgressIndicator(
-                color: Colors.white70,
-              )),
         ],
       ),
     );
@@ -396,70 +353,59 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
       color: Colors.black54,
       width: 250,
       height: 100,
-      child: getItemCount() == 0
-          ? awaitingIndicator()
-          : ListView.builder(
-              itemCount: getItemCount(),
-              itemBuilder: (context, index) {
-                final device = devices[index];
-                return Container(
-                  margin: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                              child: GestureDetector(
-                            onTap: () => _onTabItemListener(device),
-                            child: Column(
-                              children: [
-                                Text(
-                                  device.deviceName,
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                                Text(
-                                  getStateName(device.state),
-                                  style: TextStyle(
-                                      color: getStateColor(device.state)),
-                                ),
-                              ],
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                            ),
-                          )),
-                          // Request connect
-                          GestureDetector(
-                            onTap: () => _onButtonClicked(device),
-                            child: Container(
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              padding: const EdgeInsets.all(8.0),
-                              height: 35,
-                              width: 100,
-                              color:
-                                  getButtonColor(device.state).withOpacity(0.6),
-                              child: Center(
-                                child: Text(
-                                  getButtonStateName(device.state),
-                                  style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          )
+      child: (getItemCount() == 0)
+        ? awaitingIndicator()
+        : ListView.builder(
+          itemCount: getItemCount(),
+          itemBuilder: (context, index) {
+            final device = devices[index];
+            return Container(
+              margin: const EdgeInsets.all(8.0),
+              child: Column(children: [
+                Row(children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _onTabItemListener(device),
+                      child: Column(children: [
+                          Text(
+                            device.deviceName,
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                          Text(
+                            getStateName(device.state),
+                            style: TextStyle(color: getStateColor(device.state)),
+                          ),
                         ],
+                        crossAxisAlignment: CrossAxisAlignment.start,
                       ),
-                      const SizedBox(
-                        height: 8.0,
-                      ),
-                      const Divider(
-                        height: 1,
-                        color: Colors.grey,
-                      )
-                    ],
+                    )
                   ),
-                );
-              }),
+                  // Request connect
+                  GestureDetector(
+                    onTap: () => _onButtonClicked(device),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.all(8.0),
+                      height: 35,
+                      width: 100,
+                      color: getButtonColor(device.state).withOpacity(0.6),
+                      child: Center(
+                        child: Text(
+                          getButtonStateName(device.state),
+                          style: const TextStyle(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  )
+                ]),
+                const SizedBox(height: 8.0),
+                const Divider(height: 1, color: Colors.grey)
+              ]),
+            );
+          }
+        ),
     );
   }
 
@@ -493,22 +439,18 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void moveLeft(TapDownDetails details) {
-    print("[ControllerWidget] Move left");
     nearbyService.sendMessage(currentHost.deviceId, "Left");
   }
 
   void moveRight(TapDownDetails details) {
-    print("[ControllerWidget] Move right");
     nearbyService.sendMessage(currentHost.deviceId, "Right");
   }
 
   void rotateLeft(TapDownDetails details) {
-    print("[ControllerWidget] Turn left");
     nearbyService.sendMessage(currentHost.deviceId, "TurnLeft");
   }
 
   void rotateRight(TapDownDetails details) {
-    print("[ControllerWidget] Turn right");
     nearbyService.sendMessage(currentHost.deviceId, "TurnRight");
   }
 
@@ -535,41 +477,41 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
             await nearbyService.startBrowsingForPeers();
           }
         });
-    subscription =
-        nearbyService.stateChangedSubscription(callback: (devicesList) {
-      devicesList.forEach((element) {
-        print(
-            " deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
-
-        if (Platform.isAndroid) {
-          if (element.state == SessionState.connected) {
-            nearbyService.stopBrowsingForPeers();
-          } else {
-            nearbyService.startBrowsingForPeers();
+    subscription = nearbyService.stateChangedSubscription(
+      callback: (devicesList) {
+        for (Device element in devicesList) {
+          //print(" deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
+          if (Platform.isAndroid) {
+            if (element.state == SessionState.connected) {
+              nearbyService.stopBrowsingForPeers();
+            } else {
+              nearbyService.startBrowsingForPeers();
+            }
           }
         }
-      });
 
-      setState(() {
-        devices.clear();
-        devices.addAll(devicesList);
-        connectedDevices.clear();
-        connectedDevices.addAll(devicesList
-            .where((d) => d.state == SessionState.connected)
-            .toList());
-      });
-    });
+        setState(() {
+          devices.clear();
+          devices.addAll(devicesList);
+          connectedDevices.clear();
+          connectedDevices.addAll(devicesList
+              .where((d) => d.state == SessionState.connected)
+              .toList());
+        });
+      }
+    );
 
-    receivedDataSubscription =
-        nearbyService.dataReceivedSubscription(callback: (data) {
-      print("dataReceivedSubscription: ${jsonEncode(data)}");
-      applyCommand(Message.fromJson(data).message.toString());
-      showToast(jsonEncode(data),
-          context: context,
-          axis: Axis.horizontal,
-          alignment: Alignment.center,
-          position: StyledToastPosition.bottom);
-    });
+    receivedDataSubscription = nearbyService.dataReceivedSubscription(
+      callback: (data) {
+        //print("dataReceivedSubscription: ${jsonEncode(data)}");
+        applyCommand(Message.fromJson(data).message.toString());
+        showToast(jsonEncode(data),
+            context: context,
+            axis: Axis.horizontal,
+            alignment: Alignment.center,
+            position: StyledToastPosition.bottom);
+      }
+    );
   }
 
   String getStateName(SessionState state) {
@@ -617,30 +559,31 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   _onTabItemListener(Device device) {
     if (device.state == SessionState.connected) {
       showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            final myController = TextEditingController();
-            return AlertDialog(
-              title: const Text("Send message"),
-              content: TextField(controller: myController),
-              actions: [
-                TextButton(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: const Text("Send"),
-                  onPressed: () {
-                    nearbyService.sendMessage(
-                        device.deviceId, myController.text);
-                    myController.text = '';
-                  },
-                )
-              ],
-            );
-          });
+        context: context,
+        builder: (BuildContext context) {
+          final myController = TextEditingController();
+          return AlertDialog(
+            title: const Text("Send message"),
+            content: TextField(controller: myController),
+            actions: [
+              TextButton(
+                child: const Text("Cancel"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text("Send"),
+                onPressed: () {
+                  nearbyService.sendMessage(
+                      device.deviceId, myController.text);
+                  myController.text = '';
+                },
+              )
+            ],
+          );
+        }
+      );
     }
   }
 
@@ -667,16 +610,46 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
     }
   }
 
+  void lockTetromino(int id) {
+    if (!payEnergy(0.2)) return;
+    tetrominos[id].freeze();
+  }
+
+  void swapTetromino(int index, int index2) {
+    if (index2 >= 0 && index2 < 4) {
+      Tetromino temp = tetrominos[index];
+      tetrominos[index] = tetrominos[index2];
+      tetrominos[index2] = temp;
+      selectedTetromino = index2;
+    }
+  }
+
+  void sendCursed() {
+    if (!payEnergy(0.7)) return;
+    setState(() {
+      tetrominos[0] = Tetromino.fromType(7, defaultTetroColor, 0);
+    });
+  }
+
+  void sendBomb() {
+    if (!payEnergy(0.4)) return;
+    setState(() {
+      tetrominos[0] = Tetromino.fromType(8, defaultTetroColor, 0);
+    });
+  }
+
   void sendCombo() {
-    if (payEnergy(0.5))
+    if (!payEnergy(0.5)) return;
     nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SendCombo");
   }
 
   void switchFalling() {
-    if (payEnergy(0.7))
+    if (!payEnergy(0.7)) return;
     nearbyService.sendMessage(currentHost.deviceId, "Antagonist:SwitchFalling");
   }
 
+  // Checks if the antagonist has enough energy
+  // If yes, pays it and updates the host with the new energy level
   bool payEnergy(double cost) {
     if (energy < cost) return false;
     setState(() {
@@ -688,16 +661,15 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
   }
 
   void applyCommand(String command) {
-    if (command.startsWith("id")) {
+    if (command.startsWith("id")) { // what ID the player has (0, 1, 2, 3)
       playerColor = playerColors[int.parse(command[command.length - 1])];
     }
-    if (command.startsWith("r")) // what role player has
-    {
+    if (command.startsWith("r")) { // which role the player has
       setState(() => role = command.substring(2) == "PlayerRole.player"
           ? PlayerRole.player
           : PlayerRole.foe);
     }
-    if (command.startsWith("WhatIsNext?")) {
+    if (command.startsWith("WhatIsNext?")) { // Host wants a next tetromino update
       if (!hasStarted) {
         hasStarted = true;
         energy = 0.5;
@@ -709,8 +681,9 @@ class _PlayerControllerWidgetState extends State<PlayerControllerWidget> {
             Random().nextInt(15) == 1
                 ? Tetromino.fromType(8, defaultTetroColor)
                 : Tetromino.random(defaultTetroColor));
-        if (tetrominos.length < 5)
+        if (tetrominos.length < 5) {
           tetrominos.insert(0, Tetromino.random(defaultTetroColor));
+        }
         selectedTetromino = min(selectedTetromino + 1, 3);
       });
       nearbyService.sendMessage(

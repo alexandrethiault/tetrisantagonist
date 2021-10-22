@@ -5,15 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' show ChangeNotifierProvider;
-import 'package:tetrisserver/UI/controller_widget.dart';
 
 import 'DataLayer/controller_data.dart';
 import 'DataLayer/game_data.dart';
 import 'UI/main_screen.dart';
+import 'UI/controller_widget.dart';
 
-void main() => runApp(
-      const MyApp(),
-    );
+void main() => runApp(const MyApp());
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -80,7 +78,7 @@ class Home extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: Center(
-                  child: Container(
+                  child: SizedBox(
                     height: MediaQuery.of(context).size.width * 0.7,
                     width: MediaQuery.of(context).size.height * 0.4,
                     child: Column(

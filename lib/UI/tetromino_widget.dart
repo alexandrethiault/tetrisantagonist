@@ -1,14 +1,13 @@
-
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tetrisserver/DataLayer/tetromino.dart';
 
+import '../DataLayer/tetromino.dart';
 import 'my_decorations.dart';
 
-Widget TetrominoWidget(Tetromino tetromino, double width) {
+// Display widget for tetrominos.
+// Used by next_tetromino.dart and controller_widget.dart
 
+Widget TetrominoWidget(Tetromino tetromino, double width) {
   int minX = tetromino.minX;
   int maxX = tetromino.maxX;
   int minY = tetromino.minY;

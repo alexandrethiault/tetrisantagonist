@@ -1,17 +1,11 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
-import 'package:tetrisserver/constants/ui_constants.dart';
 
+import '../constants/ui_constants.dart';
 import 'square.dart';
 import 'tetromino.dart';
-
-const int GRID_WIDTH = 20;
-const int GRID_HEIGHT = 32;
-const Duration DURATION = Duration(milliseconds: 250);
-const int COOL_DOWN_INIT = 15;
 
 // data that can't stay inside GameState and must be exposed to other widgets
 class ControllerData with ChangeNotifier {

@@ -3,16 +3,16 @@ import 'package:flame/flame.dart';
 import 'package:flame/position.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tetrisserver/DataLayer/game_data.dart';
-import 'package:tetrisserver/DataLayer/square.dart';
-import 'package:tetrisserver/DataLayer/tetromino.dart';
-import 'package:tetrisserver/UI/antagonist_widget_blue.dart';
 
+import '../constants/ui_constants.dart';
+import '../DataLayer/game_data.dart';
+import '../DataLayer/square.dart';
+import '../DataLayer/tetromino.dart';
+import 'antagonist_widget_blue.dart';
 import 'antagonist_widget_green.dart';
 import 'antagonist_widget_red.dart';
 import 'antagonist_widget_yellow.dart';
 import 'my_decorations.dart';
-import '../constants/ui_constants.dart';
 
 // the game grid widget, including tetrominos falling and fallen
 
@@ -93,63 +93,15 @@ class GameWidgetState extends State<GameWidget> {
     }
 
     int oldIndex = Provider.of<GameData>(context).oldDropIndex();
-    double antagonistLeftConstraint = width * GRID_WIDTH / 4 * oldIndex - 5 * width;
+    double antagOffset = width * GRID_WIDTH / 4 * oldIndex - 5 * width;
     double laserLeftConstraint = width * GRID_WIDTH / 4 * oldIndex - 4 * width;
 
     List<Widget> stackChildren = [
       ...squareChildren,
-      Visibility(
-        visible: antagId == 0,
-        child: AnimatedPositioned(
-          top: 0,
-          left: antagonistLeftConstraint,
-          duration: const Duration(milliseconds: 200),
-          child: SizedBox(
-            height: width * 10,
-            width: width * 10,
-            child: const Antagonist_red(),
-          ),
-        ),
-      ),
-      Visibility(
-        visible: antagId == 1,
-        child: AnimatedPositioned(
-          top: 0,
-          left: antagonistLeftConstraint,
-          duration: const Duration(milliseconds: 200),
-          child: SizedBox(
-            height: width * 10,
-            width: width * 10,
-            child: const Antagonist_blue(),
-          ),
-        ),
-      ),
-      Visibility(
-        visible: antagId == 2,
-        child: AnimatedPositioned(
-          top: 0,
-          left: antagonistLeftConstraint,
-          duration: const Duration(milliseconds: 200),
-          child: SizedBox(
-            height: width * 10,
-            width: width * 10,
-            child: const Antagonist_green(),
-          ),
-        ),
-      ),
-      Visibility(
-        visible: antagId == 3,
-        child: AnimatedPositioned(
-          top: 0,
-          left: antagonistLeftConstraint,
-          duration: const Duration(milliseconds: 200),
-          child: SizedBox(
-            height: width * 10,
-            width: width * 10,
-            child: const Antagonist_yellow(),
-          ),
-        ),
-      ),
+      visibilityWidget(antagId == 0, const AntagonistRed(), antagOffset, width),
+      visibilityWidget(antagId == 1, const AntagonistBlue(), antagOffset, width),
+      visibilityWidget(antagId == 2, const AntagonistGreen(), antagOffset, width),
+      visibilityWidget(antagId == 3, const AntagonistYellow(), antagOffset, width),
     ];
 
     int step = Provider.of<GameData>(context).lineBeingDeletedStep;
@@ -170,7 +122,7 @@ class GameWidgetState extends State<GameWidget> {
       ));
       stackChildren.add(Positioned(
         top: 0,
-        left: antagonistLeftConstraint,
+        left: antagOffset,
           child: SizedBox(
             height: width * 10,
             width: width * 10,
@@ -186,5 +138,22 @@ class GameWidgetState extends State<GameWidget> {
     }
 
     return Stack(children: stackChildren);
+  }
+
+  Visibility visibilityWidget(bool visible, Widget antagonistWidget,
+      double antagonistLeftConstraint, double width) {
+    return Visibility(
+      visible: visible,
+      child: AnimatedPositioned(
+        top: 0,
+        left: antagonistLeftConstraint,
+        duration: const Duration(milliseconds: 200),
+        child: SizedBox(
+          height: width * 10,
+          width: width * 10,
+          child: antagonistWidget,
+        ),
+      ),
+    );
   }
 }

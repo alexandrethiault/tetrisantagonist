@@ -8,8 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:provider/provider.dart';
-import 'package:tetrisserver/DataLayer/game_data.dart';
-import 'package:tetrisserver/constants/ui_constants.dart';
+
+import '../constants/ui_constants.dart';
+import '../DataLayer/game_data.dart';
+
+// The host's widget that displays the devices connected and their score
+// The connections themselves are also managed there.
 
 class DevicesListScreen extends StatefulWidget {
   const DevicesListScreen({required this.deviceType});
@@ -48,81 +52,78 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
   Widget build(BuildContext context) {
     Provider.of<GameData>(context).linkService(nearbyService);
     return ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: getItemCount(),
-        itemBuilder: (context, index) {
-          final device = connectedDevices[index];
-          bool isAntagonist =
-              (Provider.of<GameData>(context).antagonist == index);
-          return Container(
-            decoration: BoxDecoration(
-              color: playerColors[index],
-              border: Border.all(
-                width: 5.0,
-                color: isAntagonist ? BORDERS_COLOR : playerColors[index],
+      scrollDirection: Axis.horizontal,
+      itemCount: getItemCount(),
+      itemBuilder: (context, index) {
+        final device = connectedDevices[index];
+        bool isAntagonist =
+            (Provider.of<GameData>(context).antagonist == index);
+        return Container(
+          decoration: BoxDecoration(
+            color: playerColors[index],
+            border: Border.all(
+              width: 5.0,
+              color: isAntagonist ? BORDERS_COLOR : playerColors[index],
+            ),
+          ),
+          width: MediaQuery.of(context).size.width * 0.20,
+          margin: const EdgeInsets.all(8.0),
+          child: Column(children: [
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  'Player ${index + 1}\n${Provider.of<GameData>(context).scores[index]}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
               ),
             ),
-            width: MediaQuery.of(context).size.width * 0.20,
-            margin: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
+            Container(
+              color: Colors.grey,
+              child: Row(children: [
                 Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: Text(
-                      'Player ${index + 1}\n${Provider.of<GameData>(context).scores[index]}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                  child: GestureDetector(
+                    onTap: () => _onTabItemListener(device),
+                    child: Column(children: [
+                        FittedBox(
+                          fit:BoxFit.contain,
+                          child: Text(
+                            device.deviceName,
+                            overflow: TextOverflow.clip,
+                          ),
+                        ),
+                      ],
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                  )
+                ),
+                // Request connect
+                GestureDetector(
+                  onTap: () => _onButtonClicked(device),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: const EdgeInsets.all(5.0),
+                    color: getButtonColor(device.state),
+                    child: const Center(
+                      child: Text(
+                        " x ",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  color: Colors.grey,
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: GestureDetector(
-                        onTap: () => _onTabItemListener(device),
-                        child: Column(
-                          children: [
-                            FittedBox(
-                              fit:BoxFit.contain,
-                              child: Text(
-                                device.deviceName,
-                                overflow: TextOverflow.clip,
-                              ),
-                            ),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                        ),
-                      )),
-                      // Request connect
-                      GestureDetector(
-                        onTap: () => _onButtonClicked(device),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                          padding: const EdgeInsets.all(5.0),
-                          color: getButtonColor(device.state),
-                          child: const Center(
-                            child: Text(
-                              " x ",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
+                )
+              ]),
             ),
-          );
-        });
+          ]),
+        );
+      }
+    );
   }
 
   String getStateName(SessionState state) {
@@ -253,45 +254,46 @@ class _DevicesListScreenState extends State<DevicesListScreen> {
             }
           }
         });
-    subscription =
-        nearbyService.stateChangedSubscription(callback: (devicesList) {
-      devicesList.forEach((element) {
-        print(
-            " deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
 
-        if (Platform.isAndroid) {
-          if (element.state == SessionState.connected) {
-            nearbyService.stopBrowsingForPeers();
-          } else {
-            nearbyService.startBrowsingForPeers();
+    subscription = nearbyService.stateChangedSubscription(
+      callback: (devicesList) {
+        for (var element in devicesList) {
+          //print(" deviceId: ${element.deviceId} | deviceName: ${element.deviceName} | state: ${element.state}");
+          if (Platform.isAndroid) {
+            if (element.state == SessionState.connected) {
+              nearbyService.stopBrowsingForPeers();
+            } else {
+              nearbyService.startBrowsingForPeers();
+            }
           }
         }
-      });
 
-      setState(() {
-        devices.clear();
-        devices.addAll(devicesList);
-        connectedDevices.clear();
-        connectedDevices.addAll(devicesList
-            .where((d) => d.state == SessionState.connected)
-            .toList());
-      });
+        setState(() {
+          devices.clear();
+          devices.addAll(devicesList);
+          connectedDevices.clear();
+          connectedDevices.addAll(devicesList
+              .where((d) => d.state == SessionState.connected)
+              .toList());
+        });
 
-      Provider.of<GameData>(context, listen: false).updatePlayerRoles(connectedDevices);
-    });
+        Provider.of<GameData>(context, listen: false).updatePlayerRoles(connectedDevices);
+      }
+    );
 
-    receivedDataSubscription =
-        nearbyService.dataReceivedSubscription(callback: (data) {
-      print("dataReceivedSubscription: ${jsonEncode(data)}");
-      print(Message.fromJson(data).message.toString());
-      Provider.of<GameData>(context, listen: false).applyCommand(Message.fromJson(data).message,
-          Message.fromJson(data).deviceId);
+    receivedDataSubscription = nearbyService.dataReceivedSubscription(
+      callback: (data) {
+        //print("dataReceivedSubscription: ${jsonEncode(data)}");
+        //print(Message.fromJson(data).message.toString());
+        Provider.of<GameData>(context, listen: false).applyCommand(
+            Message.fromJson(data).message, Message.fromJson(data).deviceId);
 
-      showToast(jsonEncode(data),
-          context: context,
-          axis: Axis.horizontal,
-          alignment: Alignment.center,
-          position: StyledToastPosition.bottom);
-    });
+        showToast(jsonEncode(data),
+            context: context,
+            axis: Axis.horizontal,
+            alignment: Alignment.center,
+            position: StyledToastPosition.bottom);
+      }
+    );
   }
 }

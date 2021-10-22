@@ -1,13 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../constants/ui_constants.dart';
 import 'energy_bar.dart';
 import 'game_widget.dart';
 import 'next_tetromino.dart';
 import 'p2p_widget.dart';
 import 'lives_widget.dart';
 import 'start_stop.dart';
-import '../constants/ui_constants.dart';
 
 // The screen the server will display to everyone during the game
 
@@ -92,5 +92,4 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-
 }

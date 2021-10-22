@@ -4,8 +4,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_nearby_connections/flutter_nearby_connections.dart';
-import 'package:tetrisserver/constants/ui_constants.dart';
 
+import '../constants/ui_constants.dart';
 import 'square.dart';
 import 'tetromino.dart';
 

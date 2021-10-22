@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tetrisserver/DataLayer/game_data.dart';
-import 'package:tetrisserver/DataLayer/tetromino.dart';
 
+import '../constants/ui_constants.dart';
+import '../DataLayer/game_data.dart';
+import '../DataLayer/tetromino.dart';
 import 'tetromino_widget.dart';
 import 'my_decorations.dart';
-import '../constants/ui_constants.dart';
 
 // Next tetromino widget, showing the next tetromino to enter the main game grid
 

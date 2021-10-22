@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tetrisserver/DataLayer/game_data.dart';
 
-import 'my_decorations.dart';
 import '../constants/ui_constants.dart';
+import '../DataLayer/game_data.dart';
+import 'my_decorations.dart';
 
 // The start or stop button widget in the main screen
 
@@ -40,5 +40,3 @@ class _StartStopState extends State<StartStop> {
     );
   }
 }
-
-

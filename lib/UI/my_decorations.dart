@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+
 import '../constants/ui_constants.dart';
 
 // A few box decorations that are going to be used in several places
